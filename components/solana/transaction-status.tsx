@@ -1,49 +1,110 @@
-import { Badge } from "../ui/badge";
+"use client";
+
+import { motion } from "motion/react";
+import { ArrowSquareOutIcon, CheckIcon, XIcon } from "@phosphor-icons/react";
+import { useOptionalCluster } from "@/components/providers/cluster";
+import { explorerUrl, type SolanaCluster } from "@/lib/solana/clusters";
 import { cn } from "@/lib/utils";
+import { Badge } from "../ui/badge";
+import { CopyButton } from "../ui/copy-button";
+import { shortenAddress } from "@/lib/solana/format";
+import type { TxPhase } from "./hooks";
 
-export type TransactionState = "processing" | "confirmed" | "failed";
+/** Legacy coarse states (still supported) plus the full lifecycle from useSendTransaction. */
+export type TransactionState = "processing" | "confirmed" | "failed" | TxPhase;
 
-const stateCopy: Record<TransactionState, { label: string; tone: "warning" | "success" | "danger"; detail: string }> = {
-  processing: { label: "Processing", tone: "warning", detail: "The network is confirming this transaction." },
-  confirmed: { label: "Confirmed", tone: "success", detail: "This transaction has been confirmed on-chain." },
-  failed: { label: "Failed", tone: "danger", detail: "The transaction was not confirmed." },
-};
+const STEPS = [
+  { key: "signing", label: "Sign" },
+  { key: "confirming", label: "Confirm" },
+  { key: "confirmed", label: "Finalized" },
+] as const;
 
-export function TransactionStatus({
-  state,
-  signature,
-  cluster = "mainnet-beta",
-  className = "",
-}: {
-  state: TransactionState;
-  signature?: string;
-  cluster?: "mainnet-beta" | "devnet" | "testnet";
-  className?: string;
-}) {
-  const copy = stateCopy[state];
-  const explorerUrl = signature
-    ? `https://explorer.solana.com/tx/${encodeURIComponent(signature)}${cluster === "mainnet-beta" ? "" : `?cluster=${cluster}`}`
-    : undefined;
-
-  return (
-    <div aria-live={state === "processing" ? "polite" : undefined} className={cn("flex items-start gap-3 rounded-2xl border border-[#e8e6da] bg-white p-4", className)} role={state === "failed" ? "alert" : "status"}>
-      <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${state === "processing" ? "animate-pulse bg-[#d4930a] motion-reduce:animate-none" : state === "confirmed" ? "bg-[#19a779]" : "bg-[#c43b32]"}`} />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-[#24241f]">Transaction</span>
-          <Badge tone={copy.tone}>{copy.label}</Badge>
-        </div>
-        <p className="mt-1.5 text-[11px] leading-5 text-[#77766e]">{copy.detail}</p>
-        {signature && explorerUrl && (
-          <a className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#087c6b] underline-offset-4 hover:underline" href={explorerUrl} target="_blank" rel="noreferrer">
-            View on Solana Explorer <ExternalLinkIcon />
-          </a>
-        )}
-      </div>
-    </div>
-  );
+function normalize(state: TransactionState): TxPhase {
+  if (state === "processing") return "confirming";
+  return state;
 }
 
-function ExternalLinkIcon() {
-  return <svg aria-hidden="true" className="size-3" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="1.5"><path d="M9 2h5v5M14 2 7 9" /><path d="M12 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4" /></svg>;
+const copy: Record<TxPhase, { label: string; tone: "neutral" | "warning" | "success" | "danger"; detail: string }> = {
+  idle: { label: "Ready", tone: "neutral", detail: "Nothing sent yet." },
+  signing: { label: "Awaiting signature", tone: "warning", detail: "Approve the request in your wallet." },
+  confirming: { label: "Confirming", tone: "warning", detail: "Sent. Waiting for the cluster to confirm." },
+  confirmed: { label: "Confirmed", tone: "success", detail: "Confirmed on-chain." },
+  failed: { label: "Failed", tone: "danger", detail: "The transaction did not land." },
+};
+
+export type TransactionStatusProps = {
+  state: TransactionState;
+  signature?: string | null;
+  error?: string | null;
+  cluster?: SolanaCluster;
+  title?: string;
+  className?: string;
+};
+
+/** Stepper card for a transaction lifecycle with signature copy + explorer link. */
+export function TransactionStatus({ state, signature, error, cluster, title = "Transaction", className }: TransactionStatusProps) {
+  const contextCluster = useOptionalCluster()?.cluster;
+  const activeCluster = cluster ?? contextCluster ?? "mainnet-beta";
+  const phase = normalize(state);
+  const info = copy[phase];
+  const failedAt = phase === "failed" ? (signature ? 1 : 0) : -1;
+  const reached = phase === "confirmed" ? 3 : phase === "confirming" ? 1 : phase === "signing" ? 0 : phase === "failed" ? failedAt : -1;
+
+  return (
+    <div
+      aria-live="polite"
+      className={cn("rounded-[20px] border border-line bg-card p-4 shadow-soft", className)}
+      role={phase === "failed" ? "alert" : "status"}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold text-fg">{title}</span>
+        <Badge tone={info.tone}>{info.label}</Badge>
+      </div>
+      <ol className="mt-4 grid grid-cols-3 gap-2" aria-label="Progress">
+        {STEPS.map((step, index) => {
+          const done = index < reached || (phase === "confirmed" && index <= 2);
+          const current = index === reached && phase !== "confirmed" && phase !== "failed";
+          const failed = phase === "failed" && index === failedAt;
+          return (
+            <li aria-current={current ? "step" : undefined} className="flex flex-col gap-2" key={step.key}>
+              <span className="relative h-1.5 overflow-hidden rounded-full bg-bg-muted">
+                <motion.span
+                  animate={{ width: done || failed ? "100%" : current ? "55%" : "0%" }}
+                  className={cn("absolute inset-y-0 left-0 rounded-full", failed ? "bg-danger" : done ? "bg-accent" : "bg-warn")}
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 160, damping: 24 }}
+                />
+                {current && <span className="absolute inset-0 animate-shimmer bg-[linear-gradient(90deg,transparent,rgb(255_255_255/0.5),transparent)] bg-[length:200%_100%]" />}
+              </span>
+              <span className={cn("flex items-center gap-1 text-[11px] font-medium", done ? "text-fg-soft" : failed ? "text-danger" : current ? "text-fg" : "text-faint")}>
+                {done && <CheckIcon size={11} weight="bold" />}
+                {failed && <XIcon size={11} weight="bold" />}
+                {step.label}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className={cn("mt-3 text-xs leading-5", phase === "failed" ? "text-danger" : "text-muted")}>{phase === "failed" && error ? error : info.detail}</p>
+      {signature && (
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-bg-subtle py-1 pl-3 pr-1">
+          <code className="truncate font-mono text-[11px] text-fg-soft" title={signature}>
+            {shortenAddress(signature, 8)}
+          </code>
+          <div className="flex shrink-0 items-center">
+            <CopyButton className="size-7 rounded-lg text-muted hover:bg-bg-muted hover:text-fg" label="Copy signature" size={13} value={signature} />
+            <a
+              className="inline-flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] font-semibold text-accent-fg transition hover:bg-accent-soft dark:text-accent"
+              href={explorerUrl("tx", signature, activeCluster)}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Explorer <ArrowSquareOutIcon size={11} weight="bold" />
+              <span className="sr-only">(opens in new tab)</span>
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -1,6 +1,13 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export function Separator({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div aria-orientation="horizontal" className={cn("h-px w-full bg-[#eeede5]", className)} role="separator" {...props} />;
+export function Separator({ className, orientation = "horizontal", ...props }: HTMLAttributes<HTMLDivElement> & { orientation?: "horizontal" | "vertical" }) {
+  return (
+    <div
+      aria-orientation={orientation}
+      className={cn(orientation === "horizontal" ? "h-px w-full" : "h-full w-px", "shrink-0 bg-line", className)}
+      role="separator"
+      {...props}
+    />
+  );
 }

@@ -1,26 +1,29 @@
+"use client";
+
+import { useOptionalCluster } from "@/components/providers/cluster";
+import { CLUSTERS, type SolanaCluster } from "@/lib/solana/clusters";
 import { Badge, type BadgeProps } from "../ui/badge";
 
-export type SolanaCluster = "mainnet-beta" | "devnet" | "testnet" | "localnet";
+export type { SolanaCluster };
 
-const clusterLabels: Record<SolanaCluster, string> = {
-  "mainnet-beta": "Mainnet",
-  devnet: "Devnet",
-  testnet: "Testnet",
-  localnet: "Localnet",
-};
-
-const clusterTones: Record<SolanaCluster, NonNullable<BadgeProps["tone"]>> = {
+const tones: Record<SolanaCluster, NonNullable<BadgeProps["tone"]>> = {
   "mainnet-beta": "success",
-  devnet: "solana",
+  devnet: "violet",
   testnet: "warning",
   localnet: "neutral",
 };
 
-export function ClusterBadge({ cluster, className = "" }: { cluster: SolanaCluster; className?: string }) {
+/** Cluster pill. Reads the active cluster from <SolanaProvider> when `cluster` is omitted. */
+export function ClusterBadge({ cluster, className, pulse = true }: { cluster?: SolanaCluster; className?: string; pulse?: boolean }) {
+  const context = useOptionalCluster();
+  const value = cluster ?? context?.cluster ?? "mainnet-beta";
   return (
-    <Badge className={className} tone={clusterTones[cluster]}>
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
-      {clusterLabels[cluster]}
+    <Badge className={className} tone={tones[value]}>
+      <span aria-hidden="true" className="relative flex size-1.5">
+        {pulse && <span className="absolute inline-flex size-full animate-ping rounded-full bg-current opacity-40" />}
+        <span className="relative inline-flex size-1.5 rounded-full bg-current" />
+      </span>
+      {CLUSTERS[value].short}
     </Badge>
   );
 }

@@ -1,76 +1,209 @@
-"use client";
-
-import { type FormEvent, useState } from "react";
 import Link from "next/link";
+import {
+  ArrowRightIcon,
+  ArrowUpRightIcon,
+  CodeIcon,
+  DropHalfIcon,
+  GithubLogoIcon,
+  KeyboardIcon,
+  LightningIcon,
+  MoonStarsIcon,
+  ShieldCheckIcon,
+  WalletIcon,
+} from "@phosphor-icons/react/ssr";
+import { Logo } from "@/components/docs/docs-shell";
+import { GITHUB_URL } from "@/lib/site";
+import { ThemeToggle } from "@/components/providers/theme";
+import { GooOrb } from "@/components/site/goo-orb";
+import { Playground } from "@/components/site/playground";
+import { Waitlist } from "@/components/site/waitlist";
+import { ConnectWallet } from "@/components/solana/connect-wallet";
+import { buttonClasses } from "@/components/ui/button";
+import { CodeBlock, InlineCommand } from "@/components/ui/code-block";
+import { REGISTRY } from "@/lib/registry";
 
-const githubUrl = "https://github.com/MisbahAnsar/solsjin";
+const FEATURES = [
+  { icon: WalletIcon, title: "Real wallet flows", body: "Wallet Standard detection, a polished modal, an empty state for users without a wallet, and auto-reconnect." },
+  { icon: LightningIcon, title: "Live on-chain data", body: "Websocket balances, RPC health, Jupiter quotes and prices. Every component handles loading and error states." },
+  { icon: DropHalfIcon, title: "Gooey motion", body: "One SVG goo primitive powers tabs, the wallet menu and toasts. It switches off for prefers-reduced-motion." },
+  { icon: KeyboardIcon, title: "Accessible", body: "Focus traps, roving tabindex, ARIA patterns and live regions. Everything works with a keyboard." },
+  { icon: MoonStarsIcon, title: "Light and dark", body: "Token-based theming with no flash on load. Copy a file and it matches your brand." },
+  { icon: CodeIcon, title: "You own the code", body: "No package lock-in. Copy the source, tweak it and ship it. Typed props, documented APIs." },
+];
 
-function GithubMark() {
+const STEPS = [
+  { title: "Install the deps", code: "bun add @solana/web3.js@1 @solana/wallet-adapter-react @solana/wallet-adapter-base motion @phosphor-icons/react" },
+  { title: "Copy the components", code: "npx degit MisbahAnsar/solsjin/components components" },
+];
+
+const providerSnippet = `import { SolanaProvider } from "@/components/providers/solana-provider";
+import { ConnectWallet, SwapWidget } from "@/components/solana";
+
+export default function App() {
   return (
-    <svg className="h-[18px] w-[18px]" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.13c-3.1.67-3.76-1.32-3.76-1.32-.5-1.3-1.24-1.65-1.24-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.62 1.22 3.26.93.1-.72.39-1.22.71-1.5-2.47-.28-5.07-1.24-5.07-5.5 0-1.22.44-2.21 1.16-2.99-.12-.28-.5-1.42.11-2.95 0 0 .95-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.1-1.44 3.05-1.14 3.05-1.14.61 1.53.23 2.67.11 2.95.72.78 1.16 1.77 1.16 2.99 0 4.27-2.61 5.21-5.1 5.49.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
-    </svg>
+    <SolanaProvider>
+      <ConnectWallet />
+      <SwapWidget />
+    </SolanaProvider>
   );
-}
+}`;
 
 export default function Home() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-
-  function joinWaitlist(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail) return;
-
-    const savedEmails = JSON.parse(localStorage.getItem("solsjin-waitlist") ?? "[]") as string[];
-    if (!savedEmails.includes(normalizedEmail)) {
-      localStorage.setItem("solsjin-waitlist", JSON.stringify([...savedEmails, normalizedEmail]));
-    }
-    setMessage("Email saved on this device. Thanks for your interest!");
-    setEmail("");
-  }
-
+  const names = REGISTRY.map((entry) => entry.name);
   return (
-    <main className="relative flex h-screen h-[100svh] min-h-0 flex-col overflow-hidden bg-paper px-6 pb-[22px] pt-[67px] text-ink max-[900px]:px-[18px] max-[900px]:pb-4 max-[900px]:pt-[59px] max-[560px]:px-[14px] max-[560px]:pb-[14px] max-[560px]:pt-[55px]">
-      <header className="absolute left-1/2 top-[3px] z-10 flex min-h-16 w-[820px] max-w-[calc(100vw-48px)] -translate-x-1/2 items-center justify-between rounded-[23px] border border-[#e9e7da] bg-[#f0efe5] px-[9px] py-[7px] pl-[58px] shadow-[0_4px_16px_#231f1208] max-[900px]:min-h-14 max-[900px]:w-[calc(100vw-40px)] max-[900px]:rounded-[17px] max-[900px]:pl-6 max-[560px]:min-h-[52px] max-[560px]:w-[calc(100vw-28px)] max-[560px]:rounded-2xl max-[560px]:px-[6px] max-[560px]:py-[5px] max-[560px]:pl-4">
-        <a className="text-[18px] font-semibold tracking-[-.055em] text-ink no-underline max-[900px]:text-[17px] max-[560px]:text-[15px]" href="#top" aria-label="Solsjin home">SOLSJIN</a>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-xs font-medium text-[#55554e] no-underline transition-colors hover:bg-white/70 hover:text-ink max-[560px]:min-h-9 max-[560px]:px-2 max-[560px]:text-[10px]" href="/components">Components</Link>
-          <a className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-ink px-[18px] text-[15px] font-medium text-white no-underline transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-[#242424] motion-reduce:transition-none max-[900px]:min-h-10 max-[900px]:rounded-[13px] max-[900px]:text-[13px] max-[560px]:min-h-[38px] max-[560px]:rounded-xl max-[560px]:px-3 max-[560px]:text-[11px]" href="#waitlist">Get launch updates</a>
+    <div className="relative overflow-x-clip">
+      <header className="fixed inset-x-0 top-3 z-40 px-3">
+        <div className="mx-auto flex h-14 max-w-[1080px] items-center gap-2 rounded-[20px] border border-line bg-bg/75 pl-4 pr-2 shadow-soft backdrop-blur-xl">
+          <Logo />
+          <nav aria-label="Main" className="ml-6 hidden items-center gap-1 md:flex">
+            {[
+              { href: "/components", label: "Components" },
+              { href: "#playground", label: "Playground" },
+              { href: "#install", label: "Install" },
+            ].map((link) => (
+              <Link className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-muted transition hover:bg-bg-muted hover:text-fg" href={link.href} key={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center gap-1">
+            <a aria-label="GitHub repository" className="grid size-9 place-items-center rounded-xl text-fg-soft transition hover:bg-bg-muted hover:text-fg" href={GITHUB_URL} rel="noreferrer" target="_blank">
+              <GithubLogoIcon size={18} weight="bold" />
+            </a>
+            <ThemeToggle />
+            <ConnectWallet className="hidden sm:inline-flex" label="Connect" size="sm" />
+          </div>
         </div>
       </header>
 
-      <section className="flex min-h-0 w-full flex-1 flex-col items-center justify-center px-0 py-[14px] pt-[52px] text-center max-[900px]:pt-[42px] min-[1500px]:pt-14 min-[1500px]:pb-[38px] max-[560px]:py-5 max-[560px]:pt-[52px]" id="top" aria-labelledby="hero-title">
-        <div className="flex flex-col items-center">
-          <h1 className="m-0 whitespace-nowrap font-thunder text-[clamp(68px,9.5vw,156px)] font-bold leading-[108px] tracking-[.01em] max-[900px]:leading-[.78] min-[1500px]:text-[156px] max-[560px]:text-[clamp(50px,13.4vw,76px)] max-[560px]:leading-[.84] max-[560px]:tracking-normal" id="hero-title">SOLSJIN-UI</h1>
-          <p className="my-6 mt-[21px] max-w-[740px] text-[23px] font-medium leading-[1.26] tracking-[-.04em] max-[900px]:mt-[19px] max-[900px]:text-[clamp(17px,2.7vw,22px)] max-[560px]:my-[19px] max-[560px]:mt-[18px] max-[560px]:max-w-[320px] max-[560px]:text-base max-[560px]:leading-[1.3] max-[560px]:tracking-[-.035em]">
-            A modern, animated, and developer-first UI library to shape<br className="max-[560px]:hidden" />
-            the future of Solana.
+      <main>
+        <section aria-labelledby="hero-title" className="relative flex min-h-[100svh] flex-col items-center justify-center px-5 pb-20 pt-32 text-center" id="top">
+          <div aria-hidden="true" className="bg-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_50%_40%,black_20%,transparent_70%)]" />
+          <GooOrb className="pointer-events-none absolute left-1/2 top-[44%] size-[460px] -translate-x-1/2 -translate-y-1/2 opacity-[.22] blur-[2px] dark:opacity-[.32] max-sm:size-[320px]" />
+          <Link className="relative inline-flex items-center gap-2 rounded-full border border-line bg-card/80 py-1 pl-1 pr-3 text-xs font-medium text-fg-soft shadow-soft backdrop-blur transition hover:border-line-strong" href="/components/swap-widget">
+            <span className="rounded-full bg-inv px-2 py-0.5 text-[10px] font-semibold text-inv-fg">New</span>
+            Jupiter swap widget and gooey toasts
+            <ArrowRightIcon size={12} weight="bold" />
+          </Link>
+          <h1 className="relative mt-7 font-thunder text-[clamp(76px,14vw,196px)] font-bold leading-[.82] tracking-[.01em] text-fg" id="hero-title">
+            SOLSJIN<span className="text-sol-gradient">-UI</span>
+          </h1>
+          <p className="relative mt-6 max-w-[620px] text-[clamp(16px,2vw,21px)] font-medium leading-[1.4] tracking-[-.03em] text-fg-soft">
+            Animated, accessible Solana components that actually work. Wallets, balances, swaps and transactions, ready to copy and paste.
           </p>
-          <a className="inline-flex min-h-[38px] items-center gap-[9px] rounded-full border border-[#161616] bg-[#5a5a58] px-[14px] text-[15px] font-normal text-white no-underline shadow-[0_2px_0_#00000012] transition-[background,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#242424] motion-reduce:transition-none max-[560px]:min-h-9 max-[560px]:text-sm" href={githubUrl} target="_blank" rel="noreferrer">
-            Star us on <GithubMark />
-          </a>
+          <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link className={buttonClasses({ size: "lg" })} href="/components">
+              Browse components <ArrowRightIcon size={16} weight="bold" />
+            </Link>
+            <a className={buttonClasses({ size: "lg", variant: "outline" })} href={GITHUB_URL} rel="noreferrer" target="_blank">
+              <GithubLogoIcon size={17} weight="bold" /> Star on GitHub
+            </a>
+          </div>
+          <div className="relative mt-6 w-full max-w-[460px]">
+            <InlineCommand command="npx degit MisbahAnsar/solsjin/components components" />
+          </div>
+        </section>
+
+        <div aria-label="Included components" className="relative overflow-hidden border-y border-line bg-bg-subtle py-4 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]" role="region">
+          <ul className="flex w-max animate-marquee gap-10 motion-reduce:animate-none">
+            {[...names, ...names].map((name, index) => (
+              <li aria-hidden={index >= names.length || undefined} className="flex items-center gap-10 whitespace-nowrap text-[13px] font-medium text-muted" key={`${name}-${index}`}>
+                {name}
+                <span aria-hidden="true" className="size-1 rounded-full bg-faint" />
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <form className="mt-[26px] flex min-h-[50px] w-full max-w-[410px] gap-[6px] rounded-[17px] border border-[#e3e1d5] bg-[#fffef8] p-[5px] shadow-[0_8px_28px_#1412080a] max-[900px]:mt-4 max-[560px]:mt-[22px] max-[560px]:min-h-[46px]" id="waitlist" onSubmit={joinWaitlist}>
-          <label className="sr-only" htmlFor="email">Email address</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="Your email for launch updates"
-            autoComplete="email"
-            required
-            className="w-0 min-w-0 flex-1 border-0 bg-transparent px-3 text-[13px] text-ink outline-none placeholder:text-[#85847c] max-[560px]:pl-2 max-[560px]:text-[11px]"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <button className="inline-flex min-w-[116px] items-center justify-center gap-[10px] rounded-xl border-0 bg-[#090909] px-4 text-[13px] font-semibold text-white transition-colors duration-200 hover:bg-[#333] max-[560px]:min-w-[98px] max-[560px]:px-[9px] max-[560px]:text-[11px]" type="submit">Notify me <span className="text-[17px]" aria-hidden="true">↗</span></button>
-        </form>
-        {message && <p className="mt-2 min-h-[18px] text-[11px] tracking-[.01em] text-[#77766e] max-[560px]:max-w-[290px] max-[560px]:text-[9px]" aria-live="polite">{message}</p>}
+        <section aria-labelledby="playground-title" className="mx-auto max-w-[1180px] scroll-mt-24 px-5 py-24" id="playground">
+          <div className="mx-auto max-w-[640px] text-center">
+            <p className="text-xs font-semibold uppercase tracking-[.14em] text-faint">Playground</p>
+            <h2 className="mt-3 text-[clamp(30px,4.4vw,48px)] font-semibold leading-[1.02] tracking-[-.055em]" id="playground-title">
+              Not screenshots. <span className="text-muted">Live components.</span>
+            </h2>
+            <p className="mt-4 text-[15px] leading-7 text-muted">Connect a wallet, switch clusters and get a real Jupiter quote. Everything below talks to Solana.</p>
+          </div>
+          <div className="mt-12">
+            <Playground />
+          </div>
+        </section>
 
-      </section>
-      <footer className="text-center text-[11px] tracking-[.02em] text-[#85847c] max-[560px]:mt-auto max-[560px]:pt-3 max-[560px]:text-[9px]">Open source, made for what comes next.</footer>
-    </main>
+        <section aria-labelledby="features-title" className="mx-auto max-w-[1180px] px-5 pb-24">
+          <h2 className="sr-only" id="features-title">
+            Features
+          </h2>
+          <ul className="grid gap-px overflow-hidden rounded-[28px] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((feature) => (
+              <li className="bg-card p-6 transition-colors hover:bg-bg-subtle" key={feature.title}>
+                <span className="grid size-10 place-items-center rounded-2xl border border-line bg-bg-subtle text-fg">
+                  <feature.icon size={20} weight="duotone" />
+                </span>
+                <h3 className="mt-5 text-[15px] font-semibold tracking-[-.02em]">{feature.title}</h3>
+                <p className="mt-1.5 text-[13.5px] leading-6 text-muted">{feature.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section aria-labelledby="install-title" className="mx-auto grid max-w-[1180px] scroll-mt-24 gap-10 px-5 pb-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]" id="install">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[.14em] text-faint">Install</p>
+            <h2 className="mt-3 text-[clamp(30px,4.4vw,44px)] font-semibold leading-[1.02] tracking-[-.055em]" id="install-title">
+              Shipping in three steps.
+            </h2>
+            <ol className="mt-8 flex flex-col gap-5">
+              {STEPS.map((step, index) => (
+                <li className="flex gap-4" key={step.title}>
+                  <span className="grid size-8 shrink-0 place-items-center rounded-full border border-line font-mono text-xs text-muted">{index + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="mb-2 text-sm font-semibold">{step.title}</p>
+                    <InlineCommand command={step.code} />
+                  </div>
+                </li>
+              ))}
+              <li className="flex gap-4">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-line font-mono text-xs text-muted">3</span>
+                <div>
+                  <p className="text-sm font-semibold">Wrap your app and compose</p>
+                  <p className="mt-1 text-[13px] leading-6 text-muted">One provider sets up the cluster, connection, wallets, modal and toasts.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+          <CodeBlock code={providerSnippet} lineNumbers title="app/page.tsx" />
+        </section>
+
+        <section aria-labelledby="cta-title" className="px-5 pb-24">
+          <div className="relative mx-auto flex max-w-[1180px] flex-col items-center overflow-hidden rounded-[36px] border border-line bg-bg-subtle px-6 py-16 text-center">
+            <GooOrb className="pointer-events-none absolute -right-20 -top-24 size-[340px] opacity-25" />
+            <ShieldCheckIcon className="relative text-fg" size={28} weight="duotone" />
+            <h2 className="relative mt-4 text-[clamp(28px,4vw,40px)] font-semibold tracking-[-.05em]" id="cta-title">
+              Get launch updates
+            </h2>
+            <p className="relative mt-2 max-w-[44ch] text-sm leading-6 text-muted">New components, blocks and templates. No spam, just ships.</p>
+            <div className="relative mt-6 flex w-full justify-center">
+              <Waitlist />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-[1180px] flex-col items-center justify-between gap-4 px-5 py-8 text-[13px] text-muted sm:flex-row">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <span className="text-faint">Open source, made for what comes next.</span>
+          </div>
+          <div className="flex items-center gap-5">
+            <Link className="transition hover:text-fg" href="/components">
+              Components
+            </Link>
+            <a className="inline-flex items-center gap-1 transition hover:text-fg" href={GITHUB_URL} rel="noreferrer" target="_blank">
+              GitHub <ArrowUpRightIcon size={12} />
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
