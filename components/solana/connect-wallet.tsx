@@ -229,26 +229,26 @@ export function ConnectedPill({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={`${name} wallet ${shortenAddress(address)}, open wallet menu`}
-        className="relative flex h-11 w-full items-center gap-2.5 rounded-full bg-inv pl-1.5 pr-3.5 text-inv-fg shadow-[inset_0_1px_0_rgb(255_255_255/.12)] transition-shadow duration-300 hover:shadow-[inset_0_1px_0_rgb(255_255_255/.12),0_10px_30px_-12px_rgb(0_0_0/.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="relative flex h-11 w-full items-center gap-2.5 rounded-full bg-inv px-1.5 text-inv-fg shadow-[inset_0_1px_0_rgb(255_255_255/.12)] transition-shadow duration-300 hover:shadow-[inset_0_1px_0_rgb(255_255_255/.12),0_10px_30px_-12px_rgb(0_0_0/.45)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         onClick={() => (open ? toggle(false) : openMenu(0))}
         onKeyDown={onTriggerKey}
         ref={triggerRef}
         type="button"
       >
-        <span className="relative">
-          <WalletAvatar address={address} size={32} />
+        <span className="relative grid size-8 shrink-0 place-items-center">
+          <WalletAvatar address={address} className="ring-inv-fg/15 dark:ring-inv-fg/15" size={32} />
           {icon && (
             // eslint-disable-next-line @next/next/no-img-element -- wallet icons are data URIs
             <img alt="" className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-[4px] ring-2 ring-inv" height={14} src={icon} width={14} />
           )}
         </span>
-        <span className="flex min-w-0 flex-1 flex-col items-start leading-none">
-          <span className="font-mono text-[13px] font-semibold tracking-[-.02em]">{shortenAddress(address)}</span>
-          <span className="mt-1 text-[10px] font-medium text-inv-muted">{name}</span>
+        <span className="flex min-w-0 flex-1 flex-col items-start justify-center gap-px text-left">
+          <span className="block max-w-full truncate font-mono text-[13px] font-semibold leading-4 tracking-[-.02em]">{shortenAddress(address)}</span>
+          <span className="block max-w-full truncate text-[11px] font-medium leading-[14px] text-inv-muted">{name}</span>
         </span>
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
-          className="text-inv-muted"
+          className="grid size-8 shrink-0 place-items-center text-inv-muted"
           transition={reduceMotion ? { duration: 0 } : liquid.snap}
         >
           <CaretDownIcon size={14} weight="bold" />
