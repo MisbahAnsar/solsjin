@@ -13,11 +13,12 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { Logo } from "@/components/docs/docs-shell";
 import { GITHUB_URL } from "@/lib/site";
-import { ThemeToggle } from "@/components/providers/theme";
+import { Clouds } from "@/components/site/clouds";
 import { GooOrb } from "@/components/site/goo-orb";
+import { LiquidMetalButton } from "@/components/motion/liquid-metal-button";
 import { Playground } from "@/components/site/playground";
+import { SiteHeader } from "@/components/site/site-header";
 import { Waitlist } from "@/components/site/waitlist";
-import { ConnectWallet } from "@/components/solana/connect-wallet";
 import { buttonClasses } from "@/components/ui/button";
 import { CodeBlock, InlineCommand } from "@/components/ui/code-block";
 import { REGISTRY } from "@/lib/registry";
@@ -52,50 +53,27 @@ export default function Home() {
   const names = REGISTRY.map((entry) => entry.name);
   return (
     <div className="relative overflow-x-clip">
-      <header className="fixed inset-x-0 top-3 z-40 px-3">
-        <div className="mx-auto flex h-14 max-w-[1080px] items-center gap-2 rounded-[20px] border border-line bg-bg/75 pl-4 pr-2 shadow-soft backdrop-blur-xl">
-          <Logo />
-          <nav aria-label="Main" className="ml-6 hidden items-center gap-1 md:flex">
-            {[
-              { href: "/components", label: "Components" },
-              { href: "#playground", label: "Playground" },
-              { href: "#install", label: "Install" },
-            ].map((link) => (
-              <Link className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-muted transition hover:bg-bg-muted hover:text-fg" href={link.href} key={link.href}>
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="ml-auto flex items-center gap-1">
-            <a aria-label="GitHub repository" className="grid size-9 place-items-center rounded-xl text-fg-soft transition hover:bg-bg-muted hover:text-fg" href={GITHUB_URL} rel="noreferrer" target="_blank">
-              <GithubLogoIcon size={18} weight="bold" />
-            </a>
-            <ThemeToggle />
-            <ConnectWallet className="hidden sm:inline-flex" label="Connect" size="sm" />
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main>
         <section aria-labelledby="hero-title" className="relative flex min-h-[100svh] flex-col items-center justify-center px-5 pb-20 pt-32 text-center" id="top">
-          <div aria-hidden="true" className="bg-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_50%_40%,black_20%,transparent_70%)]" />
-          <GooOrb className="pointer-events-none absolute left-1/2 top-[44%] size-[460px] -translate-x-1/2 -translate-y-1/2 opacity-[.22] blur-[2px] dark:opacity-[.32] max-sm:size-[320px]" />
-          <Link className="relative inline-flex items-center gap-2 rounded-full border border-line bg-card/80 py-1 pl-1 pr-3 text-xs font-medium text-fg-soft shadow-soft backdrop-blur transition hover:border-line-strong" href="/components/swap-widget">
+          <Clouds />
+          <Link className="glass relative inline-flex items-center gap-2 rounded-full border border-line py-1 pl-1 pr-3 text-xs font-medium text-fg-soft shadow-soft transition-colors hover:border-line-strong hover:text-fg" href="/components/swap-widget">
             <span className="rounded-full bg-inv px-2 py-0.5 text-[10px] font-semibold text-inv-fg">New</span>
             Jupiter swap widget and gooey toasts
             <ArrowRightIcon size={12} weight="bold" />
           </Link>
-          <h1 className="relative mt-7 font-thunder text-[clamp(76px,14vw,196px)] font-bold leading-[.82] tracking-[.01em] text-fg" id="hero-title">
-            SOLSJIN<span className="text-sol-gradient">-UI</span>
+          <h1 className="relative mt-7 font-thunder text-[clamp(76px,14vw,196px)] font-bold leading-[.82] tracking-[.01em] text-black dark:text-white" id="hero-title">
+            SOLSJIN-UI
           </h1>
-          <p className="relative mt-6 max-w-[620px] text-[clamp(16px,2vw,21px)] font-medium leading-[1.4] tracking-[-.03em] text-fg-soft">
+          <p className="relative mt-6 max-w-[620px] text-balance text-[clamp(16px,2vw,21px)] font-medium leading-[1.4] tracking-[-.03em] text-fg-soft">
             Animated, accessible Solana components that actually work. Wallets, balances, swaps and transactions, ready to copy and paste.
           </p>
           <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link className={buttonClasses({ size: "lg" })} href="/components">
+            <LiquidMetalButton href="/components" size="lg">
               Browse components <ArrowRightIcon size={16} weight="bold" />
-            </Link>
-            <a className={buttonClasses({ size: "lg", variant: "outline" })} href={GITHUB_URL} rel="noreferrer" target="_blank">
+            </LiquidMetalButton>
+            <a className={buttonClasses({ size: "lg", variant: "outline", className: "rounded-full px-6" })} href={GITHUB_URL} rel="noreferrer" target="_blank">
               <GithubLogoIcon size={17} weight="bold" /> Star on GitHub
             </a>
           </div>
@@ -104,7 +82,7 @@ export default function Home() {
           </div>
         </section>
 
-        <div aria-label="Included components" className="relative overflow-hidden border-y border-line bg-bg-subtle py-4 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]" role="region">
+        <div aria-label="Included components" className="relative overflow-hidden border-y border-line bg-bg-subtle/60 py-4 [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]" role="region">
           <ul className="flex w-max animate-marquee gap-10 motion-reduce:animate-none">
             {[...names, ...names].map((name, index) => (
               <li aria-hidden={index >= names.length || undefined} className="flex items-center gap-10 whitespace-nowrap text-[13px] font-medium text-muted" key={`${name}-${index}`}>
@@ -115,15 +93,16 @@ export default function Home() {
           </ul>
         </div>
 
-        <section aria-labelledby="playground-title" className="mx-auto max-w-[1180px] scroll-mt-24 px-5 py-24" id="playground">
-          <div className="mx-auto max-w-[640px] text-center">
+        <section aria-labelledby="playground-title" className="relative mx-auto max-w-[1180px] scroll-mt-24 px-5 py-24" id="playground">
+          <Clouds className="-inset-x-40" intensity={0.8} />
+          <div className="relative mx-auto max-w-[720px] text-center">
             <p className="text-xs font-semibold uppercase tracking-[.14em] text-faint">Playground</p>
-            <h2 className="mt-3 text-[clamp(30px,4.4vw,48px)] font-semibold leading-[1.02] tracking-[-.055em]" id="playground-title">
+            <h2 className="mt-3 text-[clamp(30px,4.4vw,48px)] font-semibold leading-[1.02] tracking-[-.055em] text-balance" id="playground-title">
               Not screenshots. <span className="text-muted">Live components.</span>
             </h2>
-            <p className="mt-4 text-[15px] leading-7 text-muted">Connect a wallet, switch clusters and get a real Jupiter quote. Everything below talks to Solana.</p>
+            <p className="mx-auto mt-4 max-w-[52ch] text-balance text-[15px] leading-7 text-muted">Connect a wallet, switch clusters and get a real Jupiter quote. Everything below talks to Solana.</p>
           </div>
-          <div className="mt-12">
+          <div className="relative mt-12">
             <Playground />
           </div>
         </section>
@@ -134,7 +113,7 @@ export default function Home() {
           </h2>
           <ul className="grid gap-px overflow-hidden rounded-[28px] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (
-              <li className="bg-card p-6 transition-colors hover:bg-bg-subtle" key={feature.title}>
+              <li className="bg-card p-6 transition-colors duration-200 hover:bg-bg-subtle" key={feature.title}>
                 <span className="grid size-10 place-items-center rounded-2xl border border-line bg-bg-subtle text-fg">
                   <feature.icon size={20} weight="duotone" />
                 </span>
@@ -174,8 +153,9 @@ export default function Home() {
         </section>
 
         <section aria-labelledby="cta-title" className="px-5 pb-24">
-          <div className="relative mx-auto flex max-w-[1180px] flex-col items-center overflow-hidden rounded-[36px] border border-line bg-bg-subtle px-6 py-16 text-center">
-            <GooOrb className="pointer-events-none absolute -right-20 -top-24 size-[340px] opacity-25" />
+          <div className="relative mx-auto flex max-w-[1180px] flex-col items-center overflow-hidden rounded-[32px] border border-line bg-bg-subtle px-6 py-16 text-center">
+            <Clouds intensity={1.2} />
+            <GooOrb className="pointer-events-none absolute -right-24 -top-28 size-[320px] opacity-20" />
             <ShieldCheckIcon className="relative text-fg" size={28} weight="duotone" />
             <h2 className="relative mt-4 text-[clamp(28px,4vw,40px)] font-semibold tracking-[-.05em]" id="cta-title">
               Get launch updates

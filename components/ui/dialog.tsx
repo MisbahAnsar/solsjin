@@ -2,9 +2,15 @@
 
 import { type ReactNode, useEffect, useId, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 import { XIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { LiquidGlass } from "./liquid-glass";
+
+const panelMotion: Variants = {
+  hidden: { y: 14, scale: 0.985, transition: { type: "spring", stiffness: 520, damping: 42 } },
+  shown: { y: 0, scale: 1, transition: { type: "spring", stiffness: 420, damping: 34 } },
+};
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -95,49 +101,49 @@ export function Dialog({ open, onOpenChange, title, description, children, class
           <motion.div
             animate={{ opacity: 1 }}
             aria-hidden="true"
-            className="absolute inset-0 bg-[rgb(8_8_7/0.45)] backdrop-blur-[3px]"
+            className="absolute inset-0 bg-[rgb(8_8_8/0.28)] backdrop-blur-[6px]"
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
             onClick={() => onOpenChange(false)}
             transition={{ duration: 0.18 }}
           />
           <motion.div
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate="shown"
             aria-describedby={description ? descriptionId : undefined}
             aria-labelledby={titleId}
             aria-modal="true"
-            className={cn(
-              "relative w-full max-w-md overflow-hidden rounded-[26px] border border-line bg-card text-fg shadow-pop outline-none",
-              className,
-            )}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            className={cn("relative w-full max-w-md outline-none", className)}
+            exit="hidden"
+            initial="hidden"
             ref={panelRef}
             role="dialog"
             tabIndex={-1}
-            transition={{ type: "spring", stiffness: 420, damping: 34 }}
+            variants={panelMotion}
           >
-            <div className={cn("flex items-start justify-between gap-4 px-5 pt-5", hideHeader && "sr-only")}>
-              <div className="min-w-0">
-                <h2 className="text-base font-semibold tracking-[-.02em]" id={titleId}>
-                  {title}
-                </h2>
-                {description && (
-                  <p className="mt-1 text-xs leading-5 text-muted" id={descriptionId}>
-                    {description}
-                  </p>
-                )}
+            {/* The panel never fades as a whole: LiquidGlass fades each layer so the blur stays live. */}
+            <LiquidGlass className="overflow-hidden text-fg" material="thick" presence radius={26}>
+              <div className={cn("flex items-start justify-between gap-4 px-5 pt-5", hideHeader && "sr-only")}>
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold tracking-[-.02em]" id={titleId}>
+                    {title}
+                  </h2>
+                  {description && (
+                    <p className="mt-1 text-xs leading-5 text-muted" id={descriptionId}>
+                      {description}
+                    </p>
+                  )}
+                </div>
+                <button
+                  aria-label="Close dialog"
+                  className="-mr-1 -mt-1 grid size-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-bg-muted hover:text-fg"
+                  onClick={() => onOpenChange(false)}
+                  type="button"
+                >
+                  <XIcon size={16} weight="bold" />
+                </button>
               </div>
-              <button
-                aria-label="Close dialog"
-                className="-mr-1 -mt-1 grid size-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-bg-muted hover:text-fg"
-                onClick={() => onOpenChange(false)}
-                type="button"
-              >
-                <XIcon size={16} weight="bold" />
-              </button>
-            </div>
-            {children}
+              {children}
+            </LiquidGlass>
           </motion.div>
         </div>
       )}

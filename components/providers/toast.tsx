@@ -3,7 +3,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowUpRightIcon, CheckIcon, InfoIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
-import { GooFilter, gooStyle, useGooId } from "@/components/motion/goo";
+import { GooFilter, gooStyle, liquid, useGooId } from "@/components/motion/goo";
 import { cn } from "@/lib/utils";
 
 export type ToastStatus = "loading" | "success" | "error" | "info";
@@ -145,43 +145,49 @@ const iconColor: Record<ToastStatus, string> = {
 };
 
 /**
- * A toast is an inverted pill whose status icon sits in a separate droplet. Whenever the status
- * changes, the droplet pulls away from the card and snaps back, melting through the goo filter.
+ * A toast is an inverted card with its status icon in a separate round droplet. Whenever the
+ * status changes (e.g. loading → success) a fresh droplet is squeezed out of the card: it starts
+ * inside the card, the goo filter draws the neck as it leaves, and it rests as a perfect circle
+ * clear of the goo's reach.
  */
 export function ToastView({ toast, dismiss, static: isStatic }: { toast: ToastRecord; dismiss?: (id: string) => void; static?: boolean }) {
   const gooId = useGooId("goo-toast");
   const reduceMotion = useReducedMotion();
-  const pull = reduceMotion ? 0 : -16;
+  const still = isStatic || reduceMotion;
+  const dropInitial = still ? false : { x: 44, scale: 0.7 };
+  const dropTransition = { ...liquid.body, delay: 0.02 };
 
   return (
     <motion.div
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className="pointer-events-auto relative w-[min(380px,calc(100vw-2rem))] pl-12"
+      className="pointer-events-auto relative w-[min(380px,calc(100vw-2rem))] pl-[58px]"
       exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.15 } }}
       initial={isStatic ? false : { opacity: 0, y: 24, scale: 0.96 }}
       layout={!isStatic}
       role={toast.status === "error" ? "alert" : "status"}
       transition={{ type: "spring", stiffness: 460, damping: 34 }}
     >
-      <GooFilter blur={7} id={gooId} />
+      <GooFilter blur={6} id={gooId} />
       <div aria-hidden="true" className="pointer-events-none absolute -inset-6" style={gooStyle(gooId)}>
-        <div className="absolute inset-6 left-[4.5rem] rounded-[20px] bg-inv" />
+        <div className="absolute inset-6 left-[82px] rounded-[20px] bg-inv" />
         <motion.div
-          animate={{ x: [0, pull, 0] }}
-          className={cn("absolute left-6 top-6 size-11 rounded-full", bubbleColor[toast.status])}
+          animate={{ x: 0, scale: 1 }}
+          className={cn("absolute left-6 top-6 size-11 rounded-full will-change-transform", bubbleColor[toast.status])}
+          initial={dropInitial}
           key={`${toast.status}-bubble`}
-          transition={{ duration: 0.7, times: [0, 0.45, 1], ease: [0.3, 1.4, 0.4, 1] }}
+          transition={dropTransition}
         />
       </div>
       <motion.span
-        animate={{ x: [0, pull, 0] }}
+        animate={{ x: 0, scale: 1, opacity: 1 }}
         className={cn("absolute left-0 top-0 grid size-11 place-items-center", iconColor[toast.status])}
+        initial={still ? false : { x: 44, scale: 0.7, opacity: 0 }}
         key={`${toast.status}-icon`}
-        transition={{ duration: 0.7, times: [0, 0.45, 1], ease: [0.3, 1.4, 0.4, 1] }}
+        transition={{ x: dropTransition, scale: dropTransition, opacity: { duration: 0.2, delay: 0.12 } }}
       >
         {iconFor[toast.status]}
       </motion.span>
-      <div className="relative flex min-h-11 items-start gap-3 py-2.5 pl-1 pr-2 text-inv-fg">
+      <div className="relative flex min-h-11 items-start gap-3 py-2.5 pl-3.5 pr-2 text-inv-fg">
         <div className="min-w-0 flex-1 pt-[1px]">
           <p className="truncate text-[13px] font-semibold tracking-[-.01em]">{toast.title}</p>
           {toast.description && <div className="mt-0.5 text-xs leading-[1.45] text-inv-muted">{toast.description}</div>}

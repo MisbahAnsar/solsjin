@@ -183,7 +183,7 @@ export function EmptyWallets() {
         {SUGGESTED.map((item) => (
           <li key={item.name}>
             <a
-              className="flex flex-col items-center gap-2 rounded-2xl border border-line bg-card px-2 py-3 text-xs font-semibold text-fg transition hover:-translate-y-0.5 hover:border-line-strong hover:shadow-soft"
+              className="flex flex-col items-center gap-2 rounded-2xl border border-line bg-card px-2 py-3 text-xs font-semibold text-fg transition hover:border-line-strong hover:bg-bg-subtle"
               href={item.href}
               rel="noreferrer"
               target="_blank"

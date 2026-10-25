@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export const THEME_STORAGE_KEY = "solsjin-theme";
 
 /** Inline, render-blocking script that applies the saved theme before first paint. */
-export const themeScript = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}})()`;
+export const themeScript = `(function(){try{var t=localStorage.getItem("${THEME_STORAGE_KEY}");if(!t){t="light"}if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}})()`;
 
 type Theme = "light" | "dark";
 

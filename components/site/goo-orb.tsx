@@ -17,7 +17,7 @@ export function GooOrb({ className }: { className?: string }) {
   const reduce = useReducedMotion();
   return (
     <div aria-hidden="true" className={className}>
-      <GooFilter blur={18} contrast={24} id={id} threshold={-10} />
+      <GooFilter alpha={22} blur={16} crisp={false} id={id} shift={-9} />
       <div className="relative grid size-full place-items-center" style={gooStyle(id)}>
         {BLOBS.map((blob, i) => (
           <motion.span

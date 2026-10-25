@@ -3,7 +3,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import {
   ArrowRightIcon,
   CubeIcon,
@@ -18,6 +18,7 @@ import { ConnectWallet } from "@/components/solana/connect-wallet";
 import { ClusterBadge } from "@/components/solana/cluster-badge";
 import { Dialog } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
+import { LiquidGlass, ScrollEdge } from "@/components/ui/liquid-glass";
 import { cn } from "@/lib/utils";
 
 export type NavItem = { slug: string; name: string; category: string; summary: string; keywords: string[]; isNew?: boolean };
@@ -206,6 +207,9 @@ export function CommandMenu({ groups, open, onOpenChange }: { groups: NavGroup[]
 export function DocsShell({ groups, children }: { groups: NavGroup[]; children: ReactNode }) {
   const [drawer, setDrawer] = useState(false);
   const [command, setCommand] = useState(false);
+  const { scrollY } = useScroll();
+  const [scrolled, setScrolled] = useState(false);
+  useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 2));
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -220,8 +224,9 @@ export function DocsShell({ groups, children }: { groups: NavGroup[]; children: 
 
   return (
     <div className="min-h-screen bg-bg text-fg">
-      <header className="sticky top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:px-6">
+      <header className="sticky top-0 z-40">
+        <ScrollEdge active={scrolled} height={64} tint={0.62} variant="bar" />
+        <div className="relative mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:px-6">
           <button aria-expanded={drawer} aria-label="Open navigation" className="grid size-9 place-items-center rounded-xl text-fg-soft hover:bg-bg-muted lg:hidden" onClick={() => setDrawer(true)} type="button">
             <ListIcon size={18} weight="bold" />
           </button>
@@ -231,7 +236,7 @@ export function DocsShell({ groups, children }: { groups: NavGroup[]; children: 
             Components
           </Link>
           <button
-            className="ml-auto flex h-9 items-center gap-2 rounded-xl border border-line bg-bg-subtle pl-3 pr-1.5 text-[13px] text-faint transition hover:border-line-strong hover:text-muted md:w-[260px]"
+            className="ml-auto flex h-9 items-center gap-2 rounded-xl border border-line bg-bg-subtle/70 pl-3 pr-1.5 text-[13px] text-faint transition hover:border-line-strong hover:text-muted md:w-[260px]"
             onClick={() => setCommand(true)}
             type="button"
           >
@@ -259,30 +264,32 @@ export function DocsShell({ groups, children }: { groups: NavGroup[]; children: 
       <AnimatePresence>
         {drawer && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <motion.div animate={{ opacity: 1 }} className="absolute inset-0 bg-black/40 backdrop-blur-sm" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={() => setDrawer(false)} />
+            <motion.div animate={{ opacity: 1 }} className="absolute inset-0 bg-[rgb(8_8_8/0.22)] backdrop-blur-[3px]" exit={{ opacity: 0 }} initial={{ opacity: 0 }} onClick={() => setDrawer(false)} />
             <motion.div
               animate={{ x: 0 }}
               aria-label="Navigation"
               aria-modal="true"
-              className="absolute inset-y-0 left-0 flex w-[300px] max-w-[85vw] flex-col border-r border-line bg-bg pt-3 shadow-pop"
-              exit={{ x: "-100%" }}
-              initial={{ x: "-100%" }}
+              className="absolute inset-y-2 left-2 w-[300px] max-w-[calc(100vw-3rem)]"
+              exit={{ x: "calc(-100% - 16px)" }}
+              initial={{ x: "calc(-100% - 16px)" }}
               onKeyDown={(event) => event.key === "Escape" && setDrawer(false)}
               role="dialog"
-              transition={{ type: "spring", stiffness: 380, damping: 36 }}
+              transition={{ type: "spring", stiffness: 380, damping: 38 }}
             >
-              <div className="flex items-center justify-between px-4 pb-3">
-                <Logo />
-                <button aria-label="Close navigation" autoFocus className="grid size-9 place-items-center rounded-xl hover:bg-bg-muted" onClick={() => setDrawer(false)} type="button">
-                  <XIcon size={17} weight="bold" />
-                </button>
-              </div>
-              <div className="px-4 pb-3 md:hidden">
-                <ConnectWallet className="w-full" size="sm" />
-              </div>
-              <div className="min-h-0 flex-1">
-                <Sidebar groups={groups} onNavigate={() => setDrawer(false)} />
-              </div>
+              <LiquidGlass className="flex h-full flex-col overflow-hidden pt-3" material="thick" radius={28}>
+                <div className="flex items-center justify-between px-4 pb-3">
+                  <Logo />
+                  <button aria-label="Close navigation" autoFocus className="grid size-9 place-items-center rounded-xl hover:bg-bg-muted" onClick={() => setDrawer(false)} type="button">
+                    <XIcon size={17} weight="bold" />
+                  </button>
+                </div>
+                <div className="px-4 pb-3 md:hidden">
+                  <ConnectWallet className="w-full" size="sm" />
+                </div>
+                <div className="min-h-0 flex-1">
+                  <Sidebar groups={groups} onNavigate={() => setDrawer(false)} />
+                </div>
+              </LiquidGlass>
             </motion.div>
           </div>
         )}

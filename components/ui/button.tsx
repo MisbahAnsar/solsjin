@@ -7,13 +7,13 @@ export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-inv text-inv-fg shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.12)] hover:opacity-90 active:scale-[.98]",
-  secondary: "bg-bg-muted text-fg hover:bg-line active:scale-[.98]",
-  outline: "border border-line-strong bg-card text-fg shadow-[0_1px_2px_rgb(0_0_0/0.04)] hover:bg-bg-subtle active:scale-[.98]",
+    "bg-inv text-inv-fg shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.12)] hover:opacity-90",
+  secondary: "bg-bg-muted text-fg hover:bg-line",
+  outline: "border border-line-strong bg-card text-fg shadow-[0_1px_2px_rgb(0_0_0/0.04)] hover:bg-bg-subtle",
   ghost: "bg-transparent text-muted hover:bg-bg-muted hover:text-fg",
-  danger: "bg-danger text-white hover:opacity-90 active:scale-[.98]",
+  danger: "bg-danger text-white hover:opacity-90",
   accent:
-    "bg-[linear-gradient(135deg,#9945ff,#3c8dff_45%,#14f195)] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_24px_-10px_#9945ff] hover:brightness-110 active:scale-[.98]",
+    "bg-[linear-gradient(135deg,#9945ff,#3c8dff_45%,#14f195)] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_24px_-10px_#9945ff] hover:brightness-110",
 };
 
 const sizes: Record<ButtonSize, string> = {

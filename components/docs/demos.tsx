@@ -3,9 +3,11 @@
 import { type ComponentType, type ReactNode, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "motion/react";
-import { CoinsIcon, GearSixIcon, ImagesIcon, ListBulletsIcon, PlusIcon, SparkleIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CoinsIcon, GearSixIcon, ImagesIcon, ListBulletsIcon, PlusIcon, SparkleIcon } from "@phosphor-icons/react";
 import { GooeyTabs } from "@/components/motion/gooey-tabs";
-import { GooFilter, gooStyle, useGooId } from "@/components/motion/goo";
+import { LiquidMetalButton } from "@/components/motion/liquid-metal-button";
+import { GooFilter, gooStyle, liquid, useGooId } from "@/components/motion/goo";
+import { LiquidGlass, ScrollEdge } from "@/components/ui/liquid-glass";
 import { useCluster } from "@/components/providers/cluster";
 import { useToast } from "@/components/providers/toast";
 import {
@@ -318,12 +320,78 @@ function GooeyTabsDemo() {
   );
 }
 
+const FEED_COLORS = ["#14f195", "#9945ff", "#ff8a3d", "#2f80ff", "#ff4f8b", "#f5c400"];
+
+function LiquidGlassDemo() {
+  return (
+    <div className="relative h-72 w-full max-w-[420px] overflow-y-auto rounded-3xl border border-line bg-bg [scrollbar-width:none]">
+      <div className="sticky top-0 z-10 h-0">
+        <ScrollEdge height={64} />
+        <LiquidGlass className="absolute inset-x-3 top-3 flex h-12 items-center justify-between px-4 text-sm font-semibold text-fg" radius={9999} refraction>
+          <span>Activity</span>
+          <span className="text-xs font-medium text-muted">Scroll me</span>
+        </LiquidGlass>
+      </div>
+      <ul className="flex flex-col gap-2.5 px-3 pb-3 pt-[72px]">
+        {Array.from({ length: 14 }, (_, index) => (
+          <li className="flex items-center gap-3 rounded-2xl border border-line bg-card p-3" key={index}>
+            <span className="size-9 shrink-0 rounded-full" style={{ background: FEED_COLORS[index % FEED_COLORS.length] }} />
+            <span className="flex flex-1 flex-col">
+              <span className="text-[13px] font-semibold text-fg">{index % 3 === 0 ? "Received SOL" : index % 3 === 1 ? "Swapped USDC → SOL" : "Minted NFT"}</span>
+              <span className="text-[11px] text-muted">{index + 1} min ago</span>
+            </span>
+            <span className="font-mono text-xs font-semibold text-fg">{(index * 1.37 + 0.42).toFixed(2)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function LiquidGlassMaterialsDemo() {
+  return (
+    <div
+      className="relative grid w-full max-w-[460px] place-items-center rounded-3xl p-8"
+      style={{ background: "repeating-linear-gradient(115deg, #14f195 0 18px, #9945ff 18px 36px, #ffffff 36px 54px, #0a0a0a 54px 72px)" }}
+    >
+      <div className="flex flex-wrap justify-center gap-3">
+        {(["clear", "regular", "thick"] as const).map((material) => (
+          <LiquidGlass className="px-5 py-3 text-sm font-semibold capitalize text-fg" key={material} material={material} radius={18} refraction>
+            {material}
+          </LiquidGlass>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScrollEdgeDemo() {
+  return (
+    <div className="relative h-64 w-full max-w-[420px] overflow-y-auto rounded-3xl border border-line bg-bg [scrollbar-width:none]">
+      <div className="sticky top-0 z-10 h-0">
+        <ScrollEdge height={80} />
+        <LiquidGlass className="absolute inset-x-6 top-3 flex h-11 items-center justify-center text-xs font-semibold text-fg" material="regular" radius={9999} refraction>
+          solsjin
+        </LiquidGlass>
+      </div>
+      <div className="space-y-3 px-5 pb-5 pt-20 text-sm leading-6 text-muted">
+        {Array.from({ length: 6 }, (_, index) => (
+          <p key={index}>
+            <span className="font-semibold text-fg">Block {index + 1}.</span> Content keeps flowing under the bar. The edge blurs it progressively, so
+            nothing is ever cut by a hard line, and the glass bar on top stays readable.
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function GooFilterDemo() {
   const id = useGooId("demo-blob");
   const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-col items-center gap-3">
-      <GooFilter blur={9} id={id} />
+      <GooFilter blur={8} id={id} />
       <div className="relative grid h-[150px] w-[260px] place-items-center">
         <div aria-hidden="true" className="absolute inset-0 grid place-items-center" style={gooStyle(id)}>
           {[-1, 0, 1].map((i) => (
@@ -331,7 +399,7 @@ function GooFilterDemo() {
               animate={open ? { x: i * 78, y: i === 0 ? -46 : 18, scale: 0.8 } : { x: 0, y: 0, scale: 0.6 }}
               className="absolute size-14 rounded-full bg-fg"
               key={i}
-              transition={{ type: "spring", stiffness: 260, damping: 16, delay: open ? (i + 1) * 0.04 : 0 }}
+              transition={{ ...(open ? liquid.body : liquid.snap), delay: open ? (i + 1) * 0.05 : (1 - i) * 0.03 }}
             />
           ))}
           <span className="absolute size-16 rounded-full bg-fg" />
@@ -350,6 +418,38 @@ function GooFilterDemo() {
       </div>
       <p className="text-xs text-muted">Click the blob</p>
     </div>
+  );
+}
+
+function LiquidMetalDemo() {
+  return (
+    <Row>
+      <LiquidMetalButton href="/components">
+        Get started <ArrowRightIcon size={16} weight="bold" />
+      </LiquidMetalButton>
+      <LiquidMetalButton aria-label="Generate" shape="circle">
+        <SparkleIcon size={18} weight="fill" />
+      </LiquidMetalButton>
+    </Row>
+  );
+}
+
+function LiquidMetalSizesDemo() {
+  return (
+    <Row>
+      <LiquidMetalButton size="sm">Small</LiquidMetalButton>
+      <LiquidMetalButton size="md">Medium</LiquidMetalButton>
+      <LiquidMetalButton size="lg">Large</LiquidMetalButton>
+    </Row>
+  );
+}
+
+function LiquidMetalSpeedDemo() {
+  return (
+    <Row>
+      <LiquidMetalButton speed={14}>Calm</LiquidMetalButton>
+      <LiquidMetalButton speed={3}>Lively</LiquidMetalButton>
+    </Row>
   );
 }
 
@@ -526,6 +626,12 @@ export const DEMOS: Record<string, ComponentType> = {
   "transaction-toast:track": ToastTrackDemo,
   "gooey-tabs:default": GooeyTabsDemo,
   "gooey-tabs:goo": GooFilterDemo,
+  "liquid-glass:default": LiquidGlassDemo,
+  "liquid-glass:materials": LiquidGlassMaterialsDemo,
+  "liquid-glass:header": ScrollEdgeDemo,
+  "liquid-metal-button:default": LiquidMetalDemo,
+  "liquid-metal-button:sizes": LiquidMetalSizesDemo,
+  "liquid-metal-button:speed": LiquidMetalSpeedDemo,
   "button:default": ButtonsDemo,
   "button:sizes": ButtonSizesDemo,
   "badge:default": BadgesDemo,

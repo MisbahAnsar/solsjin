@@ -14,7 +14,8 @@ export type CodeBlockProps = {
 /** Syntax highlighted code with a copy button. Works in server and client components. */
 export function CodeBlock({ code, title, lineNumbers = false, className, maxHeight }: CodeBlockProps) {
   const trimmed = code.replace(/^\n+|\s+$/g, "");
-  const html = highlight(trimmed);
+  // sugar-high joins block-level line spans with "\n"; drop them so <pre> does not double-space.
+  const html = highlight(trimmed).replace(/<\/span>\n<span class="sh__line">/g, "</span><span class=\"sh__line\">");
   return (
     <div className={cn("group/code relative overflow-hidden rounded-2xl border border-white/[.06] bg-code text-code-fg", className)}>
       {title ? (

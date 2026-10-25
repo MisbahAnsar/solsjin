@@ -33,7 +33,7 @@ export function Waitlist() {
           type="email"
           value={email}
         />
-        <button className="inline-flex items-center gap-1.5 rounded-xl bg-inv px-4 text-[13px] font-semibold text-inv-fg transition hover:opacity-90 active:scale-[.98]" type="submit">
+        <button className="inline-flex items-center gap-1.5 rounded-xl bg-inv px-4 text-[13px] font-semibold text-inv-fg transition hover:opacity-90" type="submit">
           Get updates <ArrowUpRightIcon size={14} weight="bold" />
         </button>
       </form>

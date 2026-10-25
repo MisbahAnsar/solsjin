@@ -1,3 +1,4 @@
+import { Clouds } from "@/components/site/clouds";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRightIcon, LightningIcon, PlugsConnectedIcon, TerminalWindowIcon } from "@phosphor-icons/react/ssr";
@@ -32,11 +33,12 @@ export default function Page() {
 export default function ComponentsOverview() {
   const groups = groupedRegistry();
   return (
-    <main className="px-5 pb-24 pt-10 sm:px-10 lg:px-14">
-      <div className="max-w-[920px]">
+    <main className="relative px-5 pb-24 pt-10 sm:px-10 lg:px-14">
+      <Clouds className="h-[520px]" intensity={0.7} />
+      <div className="relative max-w-[920px]">
         <p className="text-xs font-semibold uppercase tracking-[.14em] text-faint">Documentation</p>
-        <h1 className="mt-3 text-[clamp(34px,5vw,52px)] font-semibold leading-[1.02] tracking-[-.055em] text-fg">
-          Components that <span className="text-sol-gradient">actually work</span> on Solana.
+        <h1 className="mt-3 text-[clamp(34px,5vw,52px)] font-semibold leading-[1.02] tracking-[-.055em] text-balance text-fg">
+          Components that <span className="text-muted">actually work</span> on Solana.
         </h1>
         <p className="mt-4 max-w-[62ch] text-[15px] leading-7 text-muted">
           {REGISTRY.length} copy-paste components built on wallet-adapter, web3.js and motion. Real wallet connections, live balances, Jupiter quotes and confirmed transactions, with keyboard, screen-reader and reduced-motion support.
@@ -85,7 +87,7 @@ export default function ComponentsOverview() {
             {group.items.map((item) => (
               <li key={item.slug}>
                 <Link
-                  className="group relative flex h-full flex-col rounded-[20px] border border-line bg-card p-4 transition hover:-translate-y-0.5 hover:border-line-strong hover:shadow-lift focus-visible:ring-2 focus-visible:ring-ring"
+                  className="group relative flex h-full flex-col rounded-[20px] border border-line bg-card p-4 transition hover:border-line-strong hover:bg-bg-subtle hover:shadow-soft focus-visible:ring-2 focus-visible:ring-ring"
                   href={`/components/${item.slug}`}
                 >
                   <span className="flex items-center gap-2">

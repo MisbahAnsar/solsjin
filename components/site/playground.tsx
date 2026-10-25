@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 function Tile({ title, href, children, className }: { title: string; href: string; children: ReactNode; className?: string }) {
   return (
-    <div className={cn("group relative flex flex-col overflow-hidden rounded-[28px] border border-line bg-card", className)}>
-      <div className="flex items-center justify-between px-5 pt-4">
+    <div className={cn("group glass relative flex flex-col overflow-hidden rounded-[28px] border border-line shadow-soft transition-[border-color,box-shadow] duration-300 hover:border-line-strong hover:shadow-lift", className)}>
+      <div className="flex h-11 items-center justify-between border-b border-line/70 px-5">
         <span className="text-[12px] font-semibold text-muted">{title}</span>
         <a className="text-[11px] font-semibold text-faint opacity-0 transition group-hover:opacity-100 hover:text-fg focus-visible:opacity-100" href={href}>
           Docs →

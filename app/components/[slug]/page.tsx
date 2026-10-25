@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import Link from "next/link";
 import { NextLink } from "@/components/docs/docs-shell";
 import { ComponentPreview } from "@/components/docs/preview";
 import { PropsTable } from "@/components/docs/props-table";
@@ -28,7 +30,30 @@ function readSource(file: string) {
   }
 }
 
-export default async function ComponentPage({ params }: PageProps<"/components/[slug]">) {
+export default function ComponentPage({ params }: PageProps<"/components/[slug]">) {
+  // Params are streamed behind a skeleton so client navigations between docs pages paint instantly.
+  return (
+    <Suspense fallback={<DocSkeleton />}>
+      <ComponentDoc params={params} />
+    </Suspense>
+  );
+}
+
+function DocSkeleton() {
+  return (
+    <div aria-busy="true" className="flex animate-pulse gap-10 px-5 pb-24 pt-10 sm:px-10 lg:px-14">
+      <div className="min-w-0 max-w-[880px] flex-1">
+        <div className="h-3 w-40 rounded-full bg-bg-muted" />
+        <div className="mt-4 h-9 w-72 rounded-xl bg-bg-muted" />
+        <div className="mt-4 h-4 w-full max-w-[560px] rounded-full bg-bg-muted" />
+        <div className="mt-2 h-4 w-2/3 max-w-[420px] rounded-full bg-bg-muted" />
+        <div className="mt-10 h-[340px] rounded-[22px] border border-line bg-bg-subtle" />
+      </div>
+    </div>
+  );
+}
+
+async function ComponentDoc({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const entry = getEntry(slug);
   if (!entry) notFound();
@@ -45,9 +70,17 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
       <main className="min-w-0 max-w-[880px] flex-1">
         <nav aria-label="Breadcrumb" className="text-xs text-faint">
           <ol className="flex items-center gap-1.5">
-            <li>Components</li>
+            <li>
+              <Link className="transition-colors hover:text-fg" href="/components">
+                Components
+              </Link>
+            </li>
             <li aria-hidden="true">/</li>
             <li>{entry.category}</li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="text-fg-soft">
+              {entry.name}
+            </li>
           </ol>
         </nav>
         <h1 className="mt-3 flex flex-wrap items-center gap-3 text-[clamp(30px,4vw,40px)] font-semibold leading-[1.05] tracking-[-.05em] text-fg">
@@ -134,7 +167,17 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
           {next ? <NextLink direction="next" href={`/components/${next.slug}`} label={next.name} /> : <span className="flex-1" />}
         </nav>
       </main>
-      <aside className="sticky top-24 hidden h-fit w-[180px] shrink-0 xl:block">
+      <aside className="sticky top-24 hidden h-fit w-[200px] shrink-0 xl:block">
+        <dl className="mb-8 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 rounded-2xl border border-line bg-card p-4 text-[12px] shadow-[0_1px_0_rgb(0_0_0/.02),0_8px_24px_-18px_rgb(0_0_0/.18)]">
+          <dt className="text-faint">Category</dt>
+          <dd className="text-right font-medium text-fg-soft">{entry.category}</dd>
+          <dt className="text-faint">Files</dt>
+          <dd className="text-right font-medium tabular-nums text-fg-soft">{entry.files.length}</dd>
+          <dt className="text-faint">Deps</dt>
+          <dd className="text-right font-medium tabular-nums text-fg-soft">{entry.deps?.length ?? 0}</dd>
+          <dt className="text-faint">License</dt>
+          <dd className="text-right font-medium text-fg-soft">MIT</dd>
+        </dl>
         <p className="text-[11px] font-semibold uppercase tracking-[.12em] text-faint">On this page</p>
         <ul className="mt-3 flex flex-col gap-2 border-l border-line">
           {toc.map((item) => (

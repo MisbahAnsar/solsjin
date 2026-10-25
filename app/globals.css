@@ -4,34 +4,38 @@
 
 /* ───────────────────────── Design tokens ───────────────────────── */
 :root {
-  --bg: #fffff3;
-  --bg-subtle: #f6f5e9;
-  --bg-muted: #efeee2;
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --bg-muted: #f3f3f2;
   --card: #ffffff;
-  --card-raised: #fffffb;
-  --fg: #0b0b0a;
-  --fg-soft: #2a2a25;
-  --muted: #6c6b62;
-  --faint: #a2a196;
-  --line: #e8e6d8;
-  --line-strong: #d6d4c4;
+  --card-raised: #ffffff;
+  --fg: #0a0a0a;
+  --fg-soft: #262626;
+  --muted: #6b6b6b;
+  --faint: #a3a3a3;
+  --line: #ebebeb;
+  --line-strong: #dadada;
   --accent: #0a9c72;
-  --accent-soft: #e3f7ee;
+  --accent-soft: #e6f7f0;
   --accent-fg: #04563f;
   --violet: #7c4dff;
-  --violet-soft: #efe9ff;
+  --violet-soft: #f0ebff;
   --warn: #a8660a;
-  --warn-soft: #fff4dd;
-  --danger: #c2321f;
-  --danger-soft: #ffeeea;
+  --warn-soft: #fff5e0;
+  --danger: #d0342c;
+  --danger-soft: #ffeeec;
   --ring: #14b88a;
-  --inv-bg: #0b0b0a;
-  --inv-fg: #fffff3;
-  --inv-muted: #a3a298;
-  --code-bg: #111110;
-  --code-fg: #e9e8dc;
-  --shadow-color: 40 35 15;
-  --grid-line: rgb(11 11 10 / 0.045);
+  --inv-bg: #0a0a0a;
+  --inv-fg: #ffffff;
+  --inv-muted: #a3a3a3;
+  --code-bg: #0f0f0f;
+  --code-fg: #ececec;
+  --shadow-color: 15 15 20;
+  --grid-line: rgb(10 10 10 / 0.045);
+  --cloud-a: rgb(153 69 255 / 0.10);
+  --cloud-b: rgb(20 241 149 / 0.09);
+  --cloud-c: rgb(120 160 255 / 0.10);
+  --glass: rgb(255 255 255 / 0.62);
 
   /* syntax highlighting (sugar-high) */
   --sh-class: #7cd5ff;
@@ -76,6 +80,10 @@
   --code-fg: #e9e8dc;
   --shadow-color: 0 0 0;
   --grid-line: rgb(244 244 234 / 0.045);
+  --cloud-a: rgb(153 69 255 / 0.16);
+  --cloud-b: rgb(20 241 149 / 0.08);
+  --cloud-c: rgb(90 130 255 / 0.12);
+  --glass: rgb(18 18 17 / 0.55);
 
   color-scheme: dark;
 }
@@ -109,6 +117,7 @@
   --color-inv-muted: var(--inv-muted);
   --color-code: var(--code-bg);
   --color-code-fg: var(--code-fg);
+  --color-glass: var(--glass);
   --color-sol-purple: #9945ff;
   --color-sol-green: #14f195;
 
@@ -123,6 +132,8 @@
   --animate-marquee: marquee 38s linear infinite;
   --animate-shimmer: shimmer 2.2s linear infinite;
   --animate-float: float 7s ease-in-out infinite;
+  --animate-drift: drift 26s ease-in-out infinite alternate;
+  --animate-drift-slow: drift-slow 34s ease-in-out infinite alternate;
 
   @keyframes marquee {
     from { transform: translateX(0); }
@@ -131,6 +142,14 @@
   @keyframes shimmer {
     from { background-position: 200% 0; }
     to { background-position: -200% 0; }
+  }
+  @keyframes drift {
+    from { transform: translate3d(-4%, -2%, 0) scale(1); }
+    to { transform: translate3d(5%, 4%, 0) scale(1.08); }
+  }
+  @keyframes drift-slow {
+    from { transform: translate3d(4%, 3%, 0) scale(1.05); }
+    to { transform: translate3d(-5%, -3%, 0) scale(0.96); }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -224,4 +243,162 @@
   text-align: right;
   color: #4d4c46;
   user-select: none;
+}
+
+/* Soft, blurred mist used behind heroes and glass surfaces. */
+@utility glass {
+  background-color: var(--glass);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+
+/* ---------------------------------------------------------------- Liquid metal rim */
+.lm-chrome {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(160%, 140px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    #8b8b90,
+    #f7f7f9 7%,
+    #6d6d72 14%,
+    #c9d3ff 21%,
+    #4b4b50 30%,
+    #fbfbfc 40%,
+    #9b9ba1 48%,
+    #2e2e32 58%,
+    #ffe2cf 66%,
+    #e9e9ee 72%,
+    #707076 82%,
+    #f2f2f5 91%,
+    #8b8b90
+  );
+  animation: lm-spin 7s linear infinite;
+  will-change: rotate;
+}
+.lm-chrome-rev {
+  animation-direction: reverse;
+  background: conic-gradient(from 90deg, transparent, #fff 10%, transparent 22%, #1d1d20 40%, transparent 55%, #fff 68%, transparent 80%);
+}
+@keyframes lm-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-chrome {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------- Liquid glass */
+/*
+ * Material tokens. Tint is deliberately thin: the point is that you still see what scrolls
+ * underneath, just softened — blur + saturation do the work, the tint only guarantees contrast.
+ */
+:root {
+  --lg-blur: 14px;
+  --lg-sat: 1.9;
+  --lg-bright: 1.04;
+  --lg-tint-clear: rgb(255 255 255 / 0.26);
+  --lg-tint-regular: rgb(255 255 255 / 0.46);
+  --lg-tint-thick: rgb(255 255 255 / 0.74);
+  --lg-rim-hi: rgb(255 255 255 / 0.95);
+  --lg-rim-lo: rgb(255 255 255 / 0.32);
+  --lg-edge: rgb(10 10 20 / 0.07);
+  --lg-glow: rgb(255 255 255 / 0.45);
+  --lg-shadow: 0 1px 1px rgb(var(--shadow-color) / 0.04), 0 10px 32px -12px rgb(var(--shadow-color) / 0.22);
+}
+.dark {
+  --lg-sat: 1.6;
+  --lg-bright: 0.94;
+  --lg-tint-clear: rgb(28 28 26 / 0.34);
+  --lg-tint-regular: rgb(24 24 22 / 0.5);
+  --lg-tint-thick: rgb(20 20 19 / 0.8);
+  --lg-rim-hi: rgb(255 255 255 / 0.34);
+  --lg-rim-lo: rgb(255 255 255 / 0.08);
+  --lg-edge: rgb(255 255 255 / 0.07);
+  --lg-glow: rgb(255 255 255 / 0.06);
+  --lg-shadow: 0 1px 1px rgb(0 0 0 / 0.3), 0 14px 40px -14px rgb(0 0 0 / 0.7);
+}
+
+@layer components {
+  .liquid-glass {
+    --lg-tint: var(--lg-tint-regular);
+    position: relative;
+    isolation: isolate;
+    box-shadow: var(--lg-shadow);
+    transition: box-shadow 0.4s ease;
+  }
+  .liquid-glass[data-material="clear"] { --lg-tint: var(--lg-tint-clear); }
+  .liquid-glass[data-material="thick"] { --lg-tint: var(--lg-tint-thick); }
+
+  .liquid-glass > .lg-backdrop,
+  .liquid-glass > .lg-tint,
+  .liquid-glass > .lg-rim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .liquid-glass > .lg-backdrop {
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+    backdrop-filter: var(--lg-lens,) blur(var(--lg-blur)) saturate(var(--lg-sat)) brightness(var(--lg-bright));
+  }
+  .liquid-glass > .lg-tint {
+    background: var(--lg-tint);
+    transition: background-color 0.4s ease;
+  }
+  /* Specular rim: a 1px gradient border (bright top-left, faint bottom-right) + hairline + inner glow. */
+  .liquid-glass > .lg-rim {
+    box-shadow:
+      inset 0 0 0 0.5px var(--lg-edge),
+      inset 0 1px 0.5px -0.5px var(--lg-rim-hi),
+      inset 0 0 14px -4px var(--lg-glow);
+  }
+  .liquid-glass > .lg-rim::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      150deg,
+      var(--lg-rim-hi) 0%,
+      var(--lg-rim-lo) 22%,
+      transparent 45%,
+      transparent 62%,
+      var(--lg-rim-lo) 84%,
+      var(--lg-rim-hi) 100%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity: 0.9;
+  }
+
+  /* Progressive top-edge blur (iOS scroll edge). */
+  .scroll-edge > .scroll-edge-layer,
+  .scroll-edge > .scroll-edge-tint {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .scroll-edge > .scroll-edge-tint {
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--bg) var(--edge-tint, 40%), transparent), color-mix(in oklab, var(--bg) calc(var(--edge-tint, 40%) * 0.5), transparent) 60%, transparent);
+  }
+  .scroll-edge[data-active="true"] > .scroll-edge-layer,
+  .scroll-edge[data-active="true"] > .scroll-edge-tint {
+    opacity: 1;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-glass { --lg-tint-clear: color-mix(in oklab, var(--bg) 88%, transparent); --lg-tint-regular: color-mix(in oklab, var(--bg) 92%, transparent); --lg-tint-thick: var(--bg); }
 }
