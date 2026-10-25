@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { SolanaProvider } from "@/components/providers/solana-provider";
 import { themeScript } from "@/components/providers/theme";
 import "./globals.css";
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-screen overflow-x-hidden bg-bg font-inter text-fg antialiased">
         <SolanaProvider>{children}</SolanaProvider>
+        <Analytics />
       </body>
     </html>
   );
