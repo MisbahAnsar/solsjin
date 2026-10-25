@@ -14,12 +14,14 @@
     "@solana/wallet-adapter-react": "^0.15.40",
     "@solana/web3.js": "^1.99.0",
     "@vercel/analytics": "^2.0.1",
+    "bs58": "^6.0.0",
     "motion": "^14.6.0",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "sugar-high": "^2.6.4",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

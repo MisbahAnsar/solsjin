@@ -6,6 +6,7 @@ import { VersionedTransaction } from "@solana/web3.js";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowsDownUpIcon, GearSixIcon, LightningIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { useOptionalCluster } from "@/components/providers/cluster";
+import { JUPITER_API_URL, jupiterHeaders } from "@/lib/solana/config";
 import { formatAmount, formatUnits, parseUnits } from "@/lib/solana/format";
 import { findToken, NATIVE_SOL_MINT, TOKENS, type TokenInfo } from "@/lib/solana/tokens";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,7 @@ import { TokenSelector } from "./token-selector";
 import { TransactionStatus } from "./transaction-status";
 import { useWalletModal } from "./wallet-modal";
 
-const JUP = "https://lite-api.jup.ag/swap/v1";
+const JUP = `${JUPITER_API_URL}/swap/v1`;
 
 export type JupiterQuote = {
   inputMint: string;
@@ -33,8 +34,9 @@ type QuoteState = { key: string; quote: JupiterQuote | null; error: string | nul
 
 async function fetchQuote(input: TokenInfo, output: TokenInfo, units: bigint, slippageBps: number, signal: AbortSignal) {
   const url = `${JUP}/quote?inputMint=${input.mint}&outputMint=${output.mint}&amount=${units}&slippageBps=${slippageBps}&restrictIntermediateTokens=true`;
-  const res = await fetch(url, { signal });
+  const res = await fetch(url, { signal, headers: jupiterHeaders() });
   const data = await res.json().catch(() => null);
+  if (res.status === 429) throw new Error("Jupiter rate limit reached (429). Wait a moment or add an API key.");
   if (!res.ok || !data || data.error) throw new Error(data?.error ?? `Quote failed (${res.status})`);
   return data as JupiterQuote;
 }
@@ -140,7 +142,7 @@ export function SwapWidget({ defaultInput = "SOL", defaultOutput = "USDC", token
     await tx.send(async () => {
       const res = await fetch(`${JUP}/swap`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: jupiterHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ quoteResponse: quote, userPublicKey: publicKey.toBase58(), wrapAndUnwrapSol: true, dynamicComputeUnitLimit: true, prioritizationFeeLamports: "auto" }),
       });
       const data = await res.json().catch(() => null);

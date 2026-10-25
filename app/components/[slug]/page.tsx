@@ -58,6 +58,9 @@ async function ComponentDoc({ params }: { params: Promise<{ slug: string }> }) {
   const entry = getEntry(slug);
   if (!entry) notFound();
   const { prev, next } = neighbours(slug);
+  // deps mixes npm packages with external services ("Jupiter Swap API (...)"); split them.
+  const packages = (entry.deps ?? []).filter((dep) => !dep.includes(" "));
+  const services = (entry.deps ?? []).filter((dep) => dep.includes(" "));
   const toc = [
     ...entry.examples.map((example) => ({ id: example.id, label: example.title })),
     { id: "installation", label: "Installation" },
@@ -108,10 +111,15 @@ async function ComponentDoc({ params }: { params: Promise<{ slug: string }> }) {
             Installation
           </h2>
           <p className="mt-2 text-sm text-muted">Copy the files into your project. They only depend on each other and the packages below.</p>
-          {entry.deps && (
+          {packages.length > 0 && (
             <div className="mt-4">
-              <InlineCommand command={`bun add ${entry.deps.filter((d) => !d.includes(" ")).join(" ")}`} />
+              <InlineCommand command={`bun add ${packages.join(" ")}`} />
             </div>
+          )}
+          {services.length > 0 && (
+            <p className="mt-3 rounded-2xl border border-line bg-bg-subtle px-4 py-3 text-[13px] leading-6 text-fg-soft">
+              Uses {services.join(", ")}.
+            </p>
           )}
           {entry.provider && (
             <p className="mt-3 rounded-2xl border border-line bg-bg-subtle px-4 py-3 text-[13px] leading-6 text-fg-soft">

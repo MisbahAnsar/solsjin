@@ -1,70 +1,95 @@
-# Solsjin UI
+# solsjin
 
-Composable UI components for Solana applications, built with React, TypeScript, and Tailwind CSS. The component showcase lives at `/components`.
+Solana UI components for React and Next.js: wallets, balances, transfers, swaps, NFTs and motion primitives. They all run on real RPC data. The docs and live previews are at `/components`.
 
-## Start the app
+Stack: Next.js 16 (App Router, Turbopack), React 19, Tailwind CSS v4, `@solana/web3.js` 1.x, `@solana/wallet-adapter`, Motion and Phosphor icons.
+
+## Setup
+
+Requirements: [Bun](https://bun.sh) 1.2 or newer (npm/pnpm also work) and Node 20 or newer.
 
 ```bash
+git clone https://github.com/MisbahAnsar/solsjin.git
+cd solsjin
 bun install
-bun run dev
+cp .env.example .env.local   # optional: every value has a public default
+bun run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the launch page and [http://localhost:3000/components](http://localhost:3000/components) for the component showcase.
+| Script | What it does |
+| --- | --- |
+| `bun run dev` | Dev server with Turbopack |
+| `bun run build` | Production build |
+| `bun run start` | Serve the production build (`-p 3100` to change port) |
+| `bun run lint` | ESLint (including the React Compiler rules) |
+| `npx tsc --noEmit` | Type-check |
+
+### Environment
+
+All configuration is read in one place, `lib/solana/config.ts`. The providers, hooks and swap widget all read from it.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SOLANA_RPC_MAINNET` | `https://api.mainnet-beta.solana.com` | Mainnet RPC |
+| `NEXT_PUBLIC_SOLANA_RPC_DEVNET` | `https://api.devnet.solana.com` | Devnet RPC (default cluster) |
+| `NEXT_PUBLIC_SOLANA_RPC_TESTNET` | `https://api.testnet.solana.com` | Testnet RPC |
+| `NEXT_PUBLIC_SOLANA_RPC_LOCALNET` | `http://127.0.0.1:8899` | `solana-test-validator` |
+| `NEXT_PUBLIC_JUPITER_API_URL` | `https://api.jup.ag` | Jupiter swap quotes and prices |
+| `NEXT_PUBLIC_JUPITER_API_KEY` | none | Optional key sent as `x-api-key` (keyless use is rate limited) |
+
+These values are `NEXT_PUBLIC_*`, so they ship to the browser and are fixed at build time. Restart `dev` or rebuild after you change them. Public RPCs are heavily rate limited, so use a provider such as Helius, Triton or QuickNode in production. An RPC that supports the DAS API also gives `<NftGallery />` full metadata, including compressed NFTs.
+
+### Polyfills
+
+You don't need any. `@solana/web3.js` 1.x bundles its own `buffer`, and every Solana component is a client component, so Turbopack builds work without `Buffer` shims or webpack fallbacks.
+
+## Usage
+
+Wrap the app once. `SolanaProvider` sets up the cluster (saved in `localStorage`), the connection, the wallet adapter (Wallet Standard auto-detection with autoConnect), the wallet modal and toasts.
+
+```tsx
+// app/layout.tsx
+import { SolanaProvider } from "@/components/providers/solana-provider";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <SolanaProvider>{children}</SolanaProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```tsx
+"use client";
+import { ConnectWallet, ClusterSelector, SolBalance, SendSolForm, SignMessage, SwapWidget } from "@/components/solana";
+
+export function Wallet() {
+  return (
+    <>
+      <ConnectWallet />
+      <ClusterSelector />
+      <SolBalance />
+      <SendSolForm onSent={(signature) => console.log(signature)} />
+      <SignMessage />
+      <SwapWidget /> {/* mainnet only */}
+    </>
+  );
+}
+```
+
+Hooks: `useSolBalance`, `useTokenBalances` (SPL Token and Token-2022), `useTokenPrices`, `useWalletAssets` (DAS with a token-account fallback), `useSendTransaction` (sign, send, confirm and toast) and `useCluster`.
+
+### Network notes
+
+- **Wallets.** Phantom, Solflare, Backpack and any other Wallet Standard wallet show up automatically. If none is installed, the modal links to downloads.
+- **Airdrop.** Works on devnet, testnet and localnet. Public faucets rate-limit hard, so the button explains a 429 and links to faucet.solana.com.
+- **Send SOL.** Builds a System transfer with a fresh blockhash and confirms it against that blockhash. It checks the address, the amount and your balance with the fee kept aside, and refuses to create an account below the rent-exempt minimum.
+- **Swap.** Uses Jupiter `swap/v1`, which is mainnet only. On other clusters the widget still shows quotes but asks you to switch to mainnet before executing.
+- **Sign message.** Verifies locally with tweetnacl (ed25519). Always verify again on your server.
 
 ## Components
 
-```tsx
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
-import {
-  AddressDisplay,
-  ClusterBadge,
-  ClusterSelector,
-  SolBalance,
-  TokenAmountInput,
-  TransactionStatus,
-  WalletConnectButton,
-} from "@/components/solana";
-```
-
-### Connect a wallet
-
-`WalletConnectButton` is controlled by the host app. It does not discover wallets, store keys, or sign transactions. Connect its callbacks to your wallet provider so your application remains in charge of user approval and signing.
-
-```tsx
-const walletButtonProps = wallet
-  ? { state: "connected" as const, wallet, onDisconnect: disconnect }
-  : { state: "disconnected" as const, onConnect: openWalletPicker };
-
-<WalletConnectButton {...walletButtonProps} />
-```
-
-The prop type requires an address when the state is connected and requires an `onConnect` callback while disconnected or connecting. This keeps invalid visual states out of the component API.
-
-For new Solana applications, follow the current [Solana Kit and Wallet Standard guide](https://solana.com/docs/frontend/nextjs-solana). The Solana team recommends Wallet Standard discovery for current wallets; the UI components deliberately avoid coupling the project to a specific provider. Existing apps can connect the same callbacks to their current wallet adapter.
-
-### Show transaction status
-
-```tsx
-<TransactionStatus
-  cluster="devnet"
-  signature={signature}
-  state="confirmed"
-/>
-```
-
-Explorer links use the signature and selected cluster provided by the app. Do not pass placeholder or unverified signatures.
-
-## Component reference
-
-| Component | Purpose |
-| --- | --- |
-| `Button`, `Badge`, `Card`, `Input`, `Label`, `Separator` | Shared interface primitives with composable Tailwind classes |
-| `WalletConnectButton` | Disconnected, connecting, and connected wallet states |
-| `AddressDisplay` | Shortened public key with a copy action |
-| `ClusterBadge` | Mainnet, Devnet, Testnet, and Localnet indicator |
-| `ClusterSelector` | Controlled cluster switcher with accessible selected-state buttons |
-| `SolBalance` | Native SOL balance presentation |
-| `TokenAmountInput` | Controlled decimal amount field with asset and balance context |
-| `TransactionStatus` | Processing, confirmed, and failed states with optional Explorer link |
-
-The showcase uses sample display data and local preview interactions. Its previews do not connect to a wallet or submit transactions.
+There are 28 components across the Wallet, Network, Balances, Assets, Transactions, Motion and Primitives categories. See `/components` or `lib/registry.ts` for props, examples and accessibility notes.

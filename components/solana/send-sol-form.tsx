@@ -1,13 +1,13 @@
 "use client";
 
 import { type FormEvent, useId, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { FieldHint, Input, Label } from "../ui/input";
-import { useSendTransaction, useSolBalance } from "./hooks";
+import { describeError, useSendTransaction, useSolBalance } from "./hooks";
 import { TokenAmountInput, validateAmount } from "./token-amount-input";
 import { TransactionStatus } from "./transaction-status";
 import { useWalletModal } from "./wallet-modal";
@@ -23,10 +23,15 @@ function validateRecipient(value: string, self?: string) {
   }
 }
 
+/** Base fee for a single-signature transfer (5000 lamports). */
+const FEE_SOL = 5000 / LAMPORTS_PER_SOL;
+
 /** Real SOL transfer: validated recipient + amount, wallet signature, confirmation and toast. */
 export function SendSolForm({ className, onSent }: { className?: string; onSent?: (signature: string) => void }) {
   const id = useId();
   const { publicKey, connected } = useWallet();
+  const { connection } = useConnection();
+  const [preflight, setPreflight] = useState<string | null>(null);
   const { setVisible } = useWalletModal();
   const balance = useSolBalance(publicKey);
   const tx = useSendTransaction({ label: "Send SOL" });
@@ -35,7 +40,9 @@ export function SendSolForm({ className, onSent }: { className?: string; onSent?
   const [touched, setTouched] = useState(false);
 
   const recipientError = validateRecipient(recipient, publicKey?.toBase58());
-  const amountCheck = validateAmount(amount, { decimals: 9, balance: balance.sol, symbol: "SOL" });
+  // Keep the network fee aside so "Max" and the balance check never produce a failing transfer.
+  const spendable = balance.sol === null ? null : Math.max(0, balance.sol - FEE_SOL);
+  const amountCheck = validateAmount(amount, { decimals: 9, balance: spendable, symbol: "SOL" });
   const canSubmit = connected && recipient && amount && !recipientError && !amountCheck.error && amountCheck.units && !tx.busy;
 
   async function onSubmit(event: FormEvent) {
@@ -45,6 +52,18 @@ export function SendSolForm({ className, onSent }: { className?: string; onSent?
     if (!canSubmit || !publicKey || !amountCheck.units) return;
     const to = new PublicKey(recipient.trim());
     const lamports = amountCheck.units;
+    setPreflight(null);
+    try {
+      // A transfer that creates a new system account must leave it rent-exempt.
+      const [info, rentMin] = await Promise.all([connection.getAccountInfo(to, "confirmed"), connection.getMinimumBalanceForRentExemption(0)]);
+      if (!info && lamports < BigInt(rentMin)) {
+        setPreflight(`This address has no SOL yet. Send at least ${rentMin / LAMPORTS_PER_SOL} SOL so the account stays rent-exempt.`);
+        return;
+      }
+    } catch (error) {
+      setPreflight(describeError(error));
+      return;
+    }
     const signature = await tx.send(() => new Transaction().add(SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: to, lamports })));
     if (signature) {
       setAmount("");
@@ -63,7 +82,10 @@ export function SendSolForm({ className, onSent }: { className?: string; onSent?
           className="font-mono text-[13px]"
           id={`${id}-to`}
           invalid={!!recipientError && (touched || recipient.length > 30)}
-          onChange={(event) => setRecipient(event.target.value)}
+          onChange={(event) => {
+            setRecipient(event.target.value);
+            setPreflight(null);
+          }}
           placeholder="Wallet address"
           spellCheck={false}
           value={recipient}
@@ -74,7 +96,24 @@ export function SendSolForm({ className, onSent }: { className?: string; onSent?
           </FieldHint>
         )}
       </div>
-      <TokenAmountInput balance={connected ? balance.sol : undefined} loading={connected && balance.status === "loading"} onChange={setAmount} symbol="SOL" value={amount} />
+      <TokenAmountInput
+        balance={connected ? balance.sol : undefined}
+        loading={connected && balance.status === "loading"}
+        onChange={(value) => {
+          setAmount(value);
+          setPreflight(null);
+        }}
+        symbol="SOL"
+        value={amount}
+      />
+      {connected && balance.status === "error" && (
+        <FieldHint tone="danger">Couldn&apos;t load your balance: {balance.error}</FieldHint>
+      )}
+      {preflight && (
+        <FieldHint role="alert" tone="danger">
+          {preflight}
+        </FieldHint>
+      )}
       <Button className="w-full" disabled={connected && !canSubmit} loading={tx.busy} size="lg" type="submit">
         {!tx.busy && <PaperPlaneTiltIcon size={17} weight="duotone" />}
         {!connected ? "Connect wallet to send" : tx.phase === "signing" ? "Approve in wallet…" : tx.phase === "confirming" ? "Confirming…" : "Send SOL"}

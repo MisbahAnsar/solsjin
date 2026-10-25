@@ -20,7 +20,9 @@ import {
   EmptyWallets,
   NetworkStatus,
   NftCard,
+  NftGallery,
   SendSolForm,
+  SignMessage,
   SolBalance,
   SwapWidget,
   TokenAmountInput,
@@ -195,6 +197,33 @@ function NftDemo() {
 }
 
 // ------------------------------------------------------------------ Transactions
+
+function NftGalleryDemo() {
+  return (
+    <div className="flex w-full max-w-[720px] flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <ClusterBadge />
+      </div>
+      <NftGallery />
+    </div>
+  );
+}
+
+function NftGalleryAddressDemo() {
+  return (
+    <div className="flex w-full max-w-[720px] flex-col gap-3">
+      <NftGallery limit={6} owner="vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg" />
+    </div>
+  );
+}
+
+function SignMessageDemo() {
+  return (
+    <Stack>
+      <SignMessage />
+    </Stack>
+  );
+}
 
 function SendDemo() {
   return (
@@ -617,6 +646,9 @@ export const DEMOS: Record<string, ComponentType> = {
   "token-selector:default": TokenSelectorDemo,
   "token-icon:default": TokenIconDemo,
   "nft-card:default": NftDemo,
+  "nft-gallery:default": NftGalleryDemo,
+  "nft-gallery:address": NftGalleryAddressDemo,
+  "sign-message:default": SignMessageDemo,
   "send-sol-form:default": SendDemo,
   "swap-widget:default": () => <SwapWidget />,
   "airdrop-button:default": AirdropDemo,

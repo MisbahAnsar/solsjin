@@ -36,19 +36,21 @@ export function AirdropButton({ amount = 1, address, onSuccess, className, size,
     setBusy(true);
     const id = toastApi?.toast({ status: "loading", title: `Requesting ${amount} SOL`, description: `Airdrop to ${shortenAddress(recipient.toBase58())}` });
     try {
-      const signature = await connection.requestAirdrop(recipient, Math.round(amount * LAMPORTS_PER_SOL));
       const latest = await connection.getLatestBlockhash("confirmed");
-      await connection.confirmTransaction({ signature, ...latest }, "confirmed");
+      const signature = await connection.requestAirdrop(recipient, Math.round(amount * LAMPORTS_PER_SOL));
+      const result = await connection.confirmTransaction({ signature, ...latest }, "confirmed");
+      if (result.value.err) throw new Error(`Airdrop failed: ${JSON.stringify(result.value.err)}`);
       if (id) toastApi?.update(id, { status: "success", title: `Airdropped ${amount} SOL`, description: shortenAddress(signature, 6), action: { label: "View on Explorer", href: explorerUrl("tx", signature, cluster) } });
       onSuccess?.(signature);
     } catch (error) {
       const raw = error instanceof Error ? error.message : String(error);
-      const limited = /429|limit|faucet has run dry|airdrop/i.test(raw);
+      // Public faucets answer rate limits with 429, "limit reached", "run dry" or a bare "Internal error".
+      const limited = /429|too many requests|limit|run dry|internal error/i.test(raw);
       if (id)
         toastApi?.update(id, {
           status: "error",
           title: limited ? "Faucet rate limited" : "Airdrop failed",
-          description: limited ? "The public faucet is busy. Try again later or use the web faucet." : describeError(error),
+          description: limited ? "The public faucet is rate limited. Wait a bit, try a smaller amount or use the web faucet." : describeError(error),
           action: { label: "Open faucet.solana.com", href: "https://faucet.solana.com" },
         });
     } finally {
@@ -56,7 +58,7 @@ export function AirdropButton({ amount = 1, address, onSuccess, className, size,
     }
   }
 
-  const reason = !supported ? "Airdrops are not available on mainnet" : !recipient ? "Connect a wallet to request an airdrop" : undefined;
+  const reason = !supported ? "Airdrops are only available on devnet, testnet and localnet" : !recipient ? "Connect a wallet to request an airdrop" : undefined;
 
   return (
     <Button

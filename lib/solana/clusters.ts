@@ -1,3 +1,5 @@
+import { RPC_ENDPOINTS } from "./config";
+
 export type SolanaCluster = "mainnet-beta" | "devnet" | "testnet" | "localnet";
 
 export type ClusterInfo = {
@@ -14,28 +16,28 @@ export const CLUSTERS: Record<SolanaCluster, ClusterInfo> = {
     value: "mainnet-beta",
     label: "Mainnet Beta",
     short: "Mainnet",
-    endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET || "https://api.mainnet-beta.solana.com",
+    endpoint: RPC_ENDPOINTS["mainnet-beta"],
     faucet: false,
   },
   devnet: {
     value: "devnet",
     label: "Devnet",
     short: "Devnet",
-    endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_DEVNET || "https://api.devnet.solana.com",
+    endpoint: RPC_ENDPOINTS.devnet,
     faucet: true,
   },
   testnet: {
     value: "testnet",
     label: "Testnet",
     short: "Testnet",
-    endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_TESTNET || "https://api.testnet.solana.com",
+    endpoint: RPC_ENDPOINTS.testnet,
     faucet: true,
   },
   localnet: {
     value: "localnet",
     label: "Localnet",
     short: "Local",
-    endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_LOCALNET || "http://127.0.0.1:8899",
+    endpoint: RPC_ENDPOINTS.localnet,
     faucet: true,
   },
 };

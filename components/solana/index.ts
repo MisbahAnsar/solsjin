@@ -18,3 +18,5 @@ export * from "./transaction-toast";
 export * from "./wallet-avatar";
 export * from "./wallet-connect-button";
 export * from "./wallet-modal";
+export * from "./nft-gallery";
+export * from "./sign-message";

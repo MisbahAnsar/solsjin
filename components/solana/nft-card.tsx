@@ -76,6 +76,7 @@ export function NftCard({ name, collection, verified, image, mint, price, attrib
   const reduceMotion = useReducedMotion();
   const cluster = useOptionalCluster()?.cluster ?? "mainnet-beta";
   const [liked, setLiked] = useState(false);
+  const [broken, setBroken] = useState<string | null>(null);
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
   const rotateX = useSpring(useTransform(my, [0, 1], [6, -6]), { stiffness: 220, damping: 20 });
@@ -101,9 +102,9 @@ export function NftCard({ name, collection, verified, image, mint, price, attrib
       style={reduceMotion ? undefined : { rotateX, rotateY, transformPerspective: 900 }}
     >
       <div className="relative aspect-square overflow-hidden rounded-[18px] bg-bg-muted">
-        {image ? (
+        {image && broken !== image ? (
           // eslint-disable-next-line @next/next/no-img-element -- NFT media comes from arbitrary hosts
-          <img alt={name} className="size-full object-cover" src={image} />
+          <img alt={name} className="size-full object-cover" decoding="async" loading="lazy" onError={() => setBroken(image)} referrerPolicy="no-referrer" src={image} />
         ) : (
           <GenerativeArt className="size-full" seed={mint ?? name} />
         )}
