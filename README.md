@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Solsjin UI
 
-## Getting Started
+Composable UI components for Solana applications, built with React, TypeScript, and Tailwind CSS. The component showcase lives at `/components`.
 
-First, run the development server:
+## Start the app
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) for the launch page and [http://localhost:3000/components](http://localhost:3000/components) for the component showcase.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Components
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```tsx
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import {
+  AddressDisplay,
+  ClusterBadge,
+  ClusterSelector,
+  SolBalance,
+  TokenAmountInput,
+  TransactionStatus,
+  WalletConnectButton,
+} from "@/components/solana";
+```
 
-## Learn More
+### Connect a wallet
 
-To learn more about Next.js, take a look at the following resources:
+`WalletConnectButton` is controlled by the host app. It does not discover wallets, store keys, or sign transactions. Connect its callbacks to your wallet provider so your application remains in charge of user approval and signing.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```tsx
+const walletButtonProps = wallet
+  ? { state: "connected" as const, wallet, onDisconnect: disconnect }
+  : { state: "disconnected" as const, onConnect: openWalletPicker };
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<WalletConnectButton {...walletButtonProps} />
+```
 
-## Deploy on Vercel
+The prop type requires an address when the state is connected and requires an `onConnect` callback while disconnected or connecting. This keeps invalid visual states out of the component API.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For new Solana applications, follow the current [Solana Kit and Wallet Standard guide](https://solana.com/docs/frontend/nextjs-solana). The Solana team recommends Wallet Standard discovery for current wallets; the UI components deliberately avoid coupling the project to a specific provider. Existing apps can connect the same callbacks to their current wallet adapter.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Show transaction status
+
+```tsx
+<TransactionStatus
+  cluster="devnet"
+  signature={signature}
+  state="confirmed"
+/>
+```
+
+Explorer links use the signature and selected cluster provided by the app. Do not pass placeholder or unverified signatures.
+
+## Component reference
+
+| Component | Purpose |
+| --- | --- |
+| `Button`, `Badge`, `Card`, `Input`, `Label`, `Separator` | Shared interface primitives with composable Tailwind classes |
+| `WalletConnectButton` | Disconnected, connecting, and connected wallet states |
+| `AddressDisplay` | Shortened public key with a copy action |
+| `ClusterBadge` | Mainnet, Devnet, Testnet, and Localnet indicator |
+| `ClusterSelector` | Controlled cluster switcher with accessible selected-state buttons |
+| `SolBalance` | Native SOL balance presentation |
+| `TokenAmountInput` | Controlled decimal amount field with asset and balance context |
+| `TransactionStatus` | Processing, confirmed, and failed states with optional Explorer link |
+
+The showcase uses sample display data and local preview interactions. Its previews do not connect to a wallet or submit transactions.
