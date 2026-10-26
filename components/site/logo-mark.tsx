@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 
 /**
- * solsjin "Sol" mark: a solid sun cut by two horizon lines that widen toward the bottom.
+ * solsjin "Sol" mark: a solid sun cut by two horizon lines that widen toward the bottom,
+ * tilted 20° clockwise (the rotation is baked into the path).
  * The cuts are real gaps in the path (not painted bars), and the fill follows the inverse
  * theme token, so it reads black in light mode and off-white in dark mode.
  */
-export const LOGO_SOL_PATH = "M0.08 27A25 25 0 1 1 49.92 27ZM0.613 30.5H49.387A25 25 0 0 1 47.198 36.5H2.802A25 25 0 0 1 0.613 30.5ZM6.218 41.5H43.782A25 25 0 0 1 6.218 41.5Z";
+export const LOGO_SOL_PATH = "M0.899 18.356A25 25 0 1 1 47.733 35.402ZM0.202 21.827L46.036 38.509A25 25 0 0 1 41.926 43.399L0.207 28.214A25 25 0 0 1 0.202 21.827ZM1.708 34.081L37.006 46.929A25 25 0 0 1 1.708 34.081Z";
 
 export function LogoMark({ className, title }: { className?: string; title?: string }) {
   return (
