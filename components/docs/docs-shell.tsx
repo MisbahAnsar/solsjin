@@ -17,6 +17,7 @@ import { ThemeToggle } from "@/components/providers/theme";
 import { ConnectWallet } from "@/components/solana/connect-wallet";
 import { ClusterBadge } from "@/components/solana/cluster-badge";
 import { Dialog } from "@/components/ui/dialog";
+import { LogoMark } from "@/components/site/logo-mark";
 import { Kbd } from "@/components/ui/kbd";
 import { LiquidGlass, ScrollEdge } from "@/components/ui/liquid-glass";
 import { cn } from "@/lib/utils";
@@ -35,10 +36,7 @@ function matches(item: NavItem, query: string) {
 export function Logo({ className }: { className?: string }) {
   return (
     <Link aria-label="Solsjin UI home" className={cn("flex items-center gap-2 text-fg", className)} href="/">
-      <span aria-hidden="true" className="relative grid size-7 place-items-center overflow-hidden rounded-[9px] bg-inv">
-        <span className="absolute size-3.5 -translate-x-1 -translate-y-0.5 rounded-full bg-sol-green blur-[0.5px]" />
-        <span className="absolute size-3 translate-x-1.5 translate-y-1 rounded-full bg-sol-purple blur-[0.5px]" />
-      </span>
+      <LogoMark className="size-7" />
       <span className="text-[15px] font-semibold tracking-[-.04em]">solsjin</span>
       <span className="rounded-md border border-line px-1.5 py-px font-mono text-[10px] text-muted">ui</span>
     </Link>
