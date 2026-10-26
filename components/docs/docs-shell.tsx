@@ -35,10 +35,9 @@ function matches(item: NavItem, query: string) {
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <Link aria-label="Solsjin UI home" className={cn("flex items-center gap-2 text-fg", className)} href="/">
-      <LogoMark className="size-7" />
-      <span className="text-[15px] font-semibold tracking-[-.04em]">solsjin</span>
-      <span className="rounded-md border border-line px-1.5 py-px font-mono text-[10px] text-muted">ui</span>
+    <Link aria-label="Solsjin UI home" className={cn("flex items-center gap-2.5 text-fg", className)} href="/">
+      <LogoMark className="size-8" />
+      <span className="text-[20px] font-semibold leading-none tracking-[-.045em]">solsjin</span>
     </Link>
   );
 }
