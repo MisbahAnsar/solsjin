@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { GithubLogoIcon } from "@phosphor-icons/react/ssr";
+import { ArrowsLeftRightIcon, BellRingingIcon, CoinsIcon, GithubLogoIcon, GlobeHemisphereWestIcon, ImagesSquareIcon, WalletIcon } from "@phosphor-icons/react/ssr";
 import { Logo } from "@/components/docs/docs-shell";
 import { ThemeToggle } from "@/components/providers/theme";
-import { Clouds } from "@/components/site/clouds";
 import { Waitlist } from "@/components/site/waitlist";
 import { GITHUB_URL } from "@/lib/site";
 import { SITE_URL } from "@/lib/site-url";
@@ -18,12 +17,18 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title, description },
 };
 
-const COMING = ["Connect wallet", "Swap widget", "Token balances", "Transaction toasts", "NFT gallery", "Cluster switcher"];
+const COMING = [
+  { icon: WalletIcon, name: "Connect wallet" },
+  { icon: ArrowsLeftRightIcon, name: "Swap widget" },
+  { icon: CoinsIcon, name: "Token balances" },
+  { icon: BellRingingIcon, name: "Transaction toasts" },
+  { icon: ImagesSquareIcon, name: "NFT gallery" },
+  { icon: GlobeHemisphereWestIcon, name: "Cluster switcher" },
+];
 
 export default function ComingSoon() {
   return (
     <div className="relative flex min-h-[100svh] flex-col overflow-x-clip">
-      <Clouds />
       <header className="relative z-10 mx-auto flex w-full max-w-[1180px] items-center justify-between px-5 py-5">
         <Logo />
         <ThemeToggle className="border-transparent bg-transparent hover:border-transparent hover:bg-fg/[.06]" />
@@ -46,10 +51,11 @@ export default function ComingSoon() {
         </div>
         <p className="mt-1 text-xs text-faint">One email at launch. No spam, unsubscribe anytime.</p>
 
-        <ul aria-label="What's coming" className="mt-12 flex max-w-[620px] flex-wrap justify-center gap-2">
-          {COMING.map((item) => (
-            <li className="rounded-full border border-line bg-card/60 px-3 py-1 text-[12.5px] text-muted" key={item}>
-              {item}
+        <ul aria-label="What's coming" className="mt-12 grid w-full max-w-[560px] grid-cols-2 gap-2 sm:grid-cols-3">
+          {COMING.map(({ icon: Icon, name }) => (
+            <li className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-line bg-card px-3 py-3 text-left text-[12.5px] sm:gap-2.5 sm:px-3.5 sm:text-[13px] font-medium text-fg-soft" key={name}>
+              <Icon aria-hidden="true" className="shrink-0 text-fg" size={17} weight="duotone" />
+              {name}
             </li>
           ))}
         </ul>

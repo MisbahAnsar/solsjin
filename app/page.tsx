@@ -57,7 +57,6 @@ export default function Home() {
 
       <main>
         <section aria-labelledby="hero-title" className="relative flex min-h-[100svh] flex-col items-center justify-center px-5 pb-20 pt-32 text-center" id="top">
-          <Clouds />
           <Link className="glass relative inline-flex items-center gap-2 rounded-full border border-line py-1 pl-1 pr-3 text-xs font-medium text-fg-soft shadow-soft transition-colors hover:border-line-strong hover:text-fg" href="/components/swap-widget">
             <span className="rounded-full bg-inv px-2 py-0.5 text-[10px] font-semibold text-inv-fg">New</span>
             Jupiter swap widget and gooey toasts

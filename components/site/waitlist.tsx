@@ -3,7 +3,6 @@
 import { type FormEvent, useId, useRef, useState } from "react";
 import { ArrowRightIcon, CheckCircleIcon, EnvelopeSimpleIcon, InfoIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { LiquidMetalButton } from "@/components/motion/liquid-metal-button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -75,7 +74,7 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
       <form
         aria-describedby={`${id}-msg`}
         className={cn(
-          "glass relative flex items-center gap-1.5 rounded-full border p-1.5 pl-4 shadow-soft transition-colors",
+          "relative flex items-center gap-1.5 rounded-full border bg-card p-1.5 pl-4 transition-colors",
           invalid ? "border-danger/60" : "border-line focus-within:border-line-strong",
         )}
         noValidate
@@ -89,7 +88,7 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
           aria-invalid={invalid || undefined}
           autoCapitalize="off"
           autoComplete="email"
-          className="h-11 min-w-0 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-faint"
+          className="h-10 min-w-0 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-faint"
           disabled={status === "loading"}
           id={`${id}-email`}
           inputMode="email"
@@ -110,7 +109,12 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
           <label htmlFor={`${id}-company`}>Company</label>
           <input autoComplete="off" id={`${id}-company`} name="company" tabIndex={-1} type="text" />
         </div>
-        <LiquidMetalButton aria-busy={status === "loading" || undefined} disabled={status === "loading"} size="md" type="submit">
+        <button
+          aria-busy={status === "loading" || undefined}
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-inv px-5 text-sm font-semibold text-inv-fg transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60"
+          disabled={status === "loading"}
+          type="submit"
+        >
           {status === "loading" ? (
             <>
               <Spinner className="size-3.5" /> Joining
@@ -120,7 +124,7 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
               {cta} <ArrowRightIcon size={15} weight="bold" />
             </>
           )}
-        </LiquidMetalButton>
+        </button>
       </form>
       <div aria-live="polite" className="mt-3 min-h-6" id={`${id}-msg`} role="status">
         <AnimatePresence initial={false} mode="wait">
