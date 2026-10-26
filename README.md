@@ -90,6 +90,57 @@ Hooks: `useSolBalance`, `useTokenBalances` (SPL Token and Token-2022), `useToken
 - **Swap.** Uses Jupiter `swap/v1`, which is mainnet only. On other clusters the widget still shows quotes but asks you to switch to mainnet before executing.
 - **Sign message.** Verifies locally with tweetnacl (ed25519). Always verify again on your server.
 
+## Coming soon & launch
+
+While `COMING_SOON` is on (the default when it's unset), solsjin.com shows a single "notify me" page:
+
+- Every page URL (`/`, `/components`, `/components/*`, anything else) is **rewritten** to `app/coming-soon`. The URL stays the same and no page is deleted. Every route except `/` sends `X-Robots-Tag: noindex`.
+- Every API except `/api/waitlist*` and `/api/admin/*` returns `404`.
+- Static files (`/_next/*`, fonts, images, `favicon.ico`, `icon.svg`, `robots.txt`, the OG image) and Vercel Analytics (`/_vercel/*`) still load.
+- The gate lives in `proxy.ts` (Next 16's middleware) and `lib/gate.ts`.
+- To see the full site while it's gated, set `PREVIEW_SECRET` and visit `https://solsjin.com/?preview=<PREVIEW_SECRET>`. That sets a 30-day cookie; `/?preview=off` removes it.
+
+Signups go to Postgres through `POST /api/waitlist`:
+
+- Emails are normalised and validated on the server, and duplicates are reported as "already on the list".
+- The form has a honeypot field, and each IP gets 5 tries a minute.
+- The schema is in `db/migrations/001_waitlist.sql`. It runs automatically (`create table if not exists`) on the first request, so you don't need to run a migration.
+- Without `DATABASE_URL` the API returns `503 not_configured` and logs it. The build works without any env vars.
+
+### Set up (once)
+
+1. **Database**:
+   - In Vercel, go to Project → Storage → Create/Connect → **Neon** (or Supabase) and connect it to the project. This adds `DATABASE_URL`.
+   - If you use Supabase directly, use the **pooled** connection string (port 6543) as `DATABASE_URL`.
+2. **Email**:
+   - In [Resend](https://resend.com), add and verify the domain `solsjin.com`: add the DNS records it shows you, then wait until it says *Verified*.
+   - Create an API key.
+3. **Env vars**: in Vercel → Project → Settings → Environment Variables (Production), set:
+
+   | Variable | Value |
+   | --- | --- |
+   | `DATABASE_URL` | set by the Neon/Supabase integration |
+   | `ADMIN_SECRET` | a long random string, 12+ chars, e.g. `openssl rand -base64 32` |
+   | `RESEND_API_KEY` | `re_...` |
+   | `EMAIL_FROM` | `solsjin <hello@solsjin.com>` (must be on the verified domain) |
+   | `PREVIEW_SECRET` | optional, another random string |
+   | `COMING_SOON` | optional. Unset or `true` keeps the gate on. |
+
+   Then redeploy.
+4. **Domain**:
+   - In Vercel → Project → Settings → Domains, add `solsjin.com` (and `www.solsjin.com`, redirecting to it).
+   - Point DNS where Vercel tells you to.
+
+### Launch
+
+1. Open `https://solsjin.com/admin/launch` and sign in with `ADMIN_SECRET`. The page shows the subscriber count and the list, and has a CSV export.
+2. Edit the subject and body if you want; the default links to https://solsjin.com. Then use **Send test** to email yourself.
+3. Click **Send launch email** and confirm.
+   - It sends in batches of 100 through the Resend batch API and marks each person `notified_at`.
+   - Only people who haven't been emailed get it, so if something fails, click it again. Nobody is emailed twice.
+   - Every email has an unsubscribe link and a `List-Unsubscribe` header.
+4. Set `COMING_SOON=false` in Vercel and redeploy. The full site is live, and `/coming-soon` now redirects to `/`.
+
 ## Components
 
 There are 28 components across the Wallet, Network, Balances, Assets, Transactions, Motion and Primitives categories. See `/components` or `lib/registry.ts` for props, examples and accessibility notes.
