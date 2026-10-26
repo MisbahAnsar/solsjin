@@ -28,6 +28,31 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
+  const tokenRef = useRef<{ at: number; promise: Promise<string> } | null>(null);
+
+  /** Signed form token, fetched once someone shows intent (focus/hover), never on page load. */
+  function getToken(fresh = false) {
+    const current = tokenRef.current;
+    if (!fresh && current && Date.now() - current.at < 90 * 60_000) return current;
+    const promise = fetch("/api/waitlist/token", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { token?: string }) => data.token ?? "")
+      .catch(() => "");
+    tokenRef.current = { at: Date.now(), promise };
+    return tokenRef.current;
+  }
+
+  async function post(value: string, company: string, fresh = false) {
+    const { at, promise } = getToken(fresh);
+    const token = await promise;
+    const wait = 1700 - (Date.now() - at);
+    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+    return fetch("/api/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: value, source, company, token }),
+    });
+  }
 
   async function join(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,12 +68,12 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
     setStatus("loading");
     setMessage("");
     try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: value, source, company }),
-      });
-      const data = (await res.json().catch(() => ({}))) as { status?: string; error?: string };
+      let res = await post(value, company);
+      let data = (await res.json().catch(() => ({}))) as { status?: string; code?: string; error?: string };
+      if (res.status === 400 && data.code === "token") {
+        res = await post(value, company, true);
+        data = (await res.json().catch(() => ({}))) as typeof data;
+      }
       if (res.ok && data.status === "already_subscribed") {
         setStatus("exists");
         setMessage("You're already on the list. We'll email you at launch.");
@@ -78,6 +103,8 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
           invalid ? "border-danger/60" : "border-line focus-within:border-line-strong",
         )}
         noValidate
+        onFocus={() => void getToken()}
+        onPointerEnter={() => void getToken()}
         onSubmit={join}
       >
         <EnvelopeSimpleIcon aria-hidden="true" className="shrink-0 text-faint" size={18} />

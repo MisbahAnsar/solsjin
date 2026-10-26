@@ -14,6 +14,15 @@ create table if not exists waitlist (
 );
 create unique index if not exists waitlist_email_key on waitlist (email);
 create index if not exists waitlist_pending_idx on waitlist (id) where notified_at is null and unsubscribed_at is null;
+create table if not exists rate_limits (
+  key      text primary key,
+  count    integer not null,
+  reset_at timestamptz not null
+);
+create table if not exists email_quota (
+  day  date primary key,
+  sent integer not null default 0
+);
 `;
 
 export class NotConfiguredError extends Error {

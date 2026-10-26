@@ -2,7 +2,8 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 export const ADMIN_COOKIE = "solsjin_admin";
-const MAX_AGE = 60 * 60 * 24 * 7;
+/** Admin sessions last 8 hours. */
+const MAX_AGE = 60 * 60 * 8;
 
 export function isAdminConfigured() {
   return (process.env.ADMIN_SECRET ?? "").length >= 12;
@@ -53,12 +54,13 @@ export async function isAdmin() {
   return verifySessionValue(jar.get(ADMIN_COOKIE)?.value);
 }
 
-/** Rejects cross-site POSTs (in addition to the SameSite=Strict cookie). */
+/** Rejects cross-site POSTs (in addition to the SameSite=Strict cookie). Origin is required. */
 export function sameOrigin(request: Request) {
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   const origin = request.headers.get("origin");
-  if (!origin) return true;
+  if (!origin) return request.headers.get("sec-fetch-site") === "same-origin";
   try {
-    return new URL(origin).host === (request.headers.get("x-forwarded-host") ?? request.headers.get("host"));
+    return new URL(origin).host === host;
   } catch {
     return false;
   }

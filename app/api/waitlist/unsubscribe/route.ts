@@ -1,8 +1,10 @@
 import { verifyUnsubscribeToken } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
+import { clientIp, rateLimit } from "@/lib/server/rate-limit";
 import { SITE_URL } from "@/lib/site-url";
 
 async function unsubscribe(request: Request) {
+  if (!rateLimit(`unsub:${clientIp(request)}`, 20, 60_000).ok) return { status: 429, message: "Too many requests. Try again in a minute." };
   const url = new URL(request.url);
   const email = (url.searchParams.get("e") ?? "").trim().toLowerCase();
   const token = url.searchParams.get("t") ?? "";

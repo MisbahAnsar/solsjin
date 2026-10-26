@@ -161,7 +161,7 @@ function Dashboard({ session }: { session: Session }) {
     let total = 0;
     try {
       for (let i = 0; i < 1000; i++) {
-        const { ok, data } = await api<{ sent: number; remaining: number; dryRun: boolean }>("/api/admin/send", { method: "POST", body: JSON.stringify({ mode: "launch", subject, body }) });
+        const { ok, data } = await api<{ sent: number; remaining: number; dryRun: boolean; quotaReached?: boolean; resetsAt?: string; dailyLimit?: number }>("/api/admin/send", { method: "POST", body: JSON.stringify({ mode: "launch", confirm: "launch", subject, body }) });
         if (!ok) throw new Error(data.error ?? "Send failed.");
         if (data.dryRun) {
           setLaunchNotice({ tone: "muted", text: `Dry run: would email ${data.sent} subscriber(s). Set RESEND_API_KEY and EMAIL_FROM to send for real.` });
@@ -169,6 +169,13 @@ function Dashboard({ session }: { session: Session }) {
         }
         total += data.sent;
         setProgress({ sent: total, remaining: data.remaining });
+        if (data.quotaReached) {
+          setLaunchNotice({
+            tone: "muted",
+            text: `Daily email limit reached (${data.dailyLimit ?? 100}/day on Resend's free plan). ${total} sent now, ${data.remaining} still pending. Press send again after ${fmt(data.resetsAt ?? null)}; nobody gets it twice.`,
+          });
+          return;
+        }
         if (data.remaining === 0 || data.sent === 0) break;
       }
       setLaunchNotice({ tone: "success", text: total === 0 ? "Everyone has already been emailed. Nothing to send." : `Launch email sent to ${total} subscriber(s).` });
