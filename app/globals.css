@@ -252,37 +252,57 @@
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
 
-/* ---------------------------------------------------------------- Liquid metal rim */
+/* ---------------------------------------------------------------- Liquid metal rim — fine platinum bezel.
+ * Idle: no animation (scroll-safe). Hover/focus: spin via individual `rotate` so it
+ * composes with `translate`. Reduced motion: always static. */
 .lm-chrome {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: max(160%, 140px);
+  width: max(170%, 160px);
   aspect-ratio: 1;
   translate: -50% -50%;
   border-radius: 9999px;
   background: conic-gradient(
     from 0deg,
-    #8b8b90,
-    #f7f7f9 7%,
-    #6d6d72 14%,
-    #c9d3ff 21%,
-    #4b4b50 30%,
-    #fbfbfc 40%,
-    #9b9ba1 48%,
-    #2e2e32 58%,
-    #ffe2cf 66%,
-    #e9e9ee 72%,
-    #707076 82%,
-    #f2f2f5 91%,
-    #8b8b90
+    #2a2a2e,
+    #f4f5f8 6%,
+    #6e727a 12%,
+    #dce4f5 18%,
+    #3a3c42 26%,
+    #ffffff 34%,
+    #8a909a 42%,
+    #1c1d21 52%,
+    #b8c4dc 60%,
+    #f7f8fb 68%,
+    #555860 78%,
+    #eef1f6 88%,
+    #2a2a2e
   );
-  animation: lm-spin 7s linear infinite;
-  will-change: rotate;
 }
 .lm-chrome-rev {
-  animation-direction: reverse;
-  background: conic-gradient(from 90deg, transparent, #fff 10%, transparent 22%, #1d1d20 40%, transparent 55%, #fff 68%, transparent 80%);
+  opacity: 0.8;
+  mix-blend-mode: soft-light;
+  background: conic-gradient(
+    from 110deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.95) 8%,
+    transparent 18%,
+    rgb(12 12 14 / 0.85) 36%,
+    transparent 48%,
+    rgb(210 220 245 / 0.7) 62%,
+    transparent 74%,
+    rgb(255 255 255 / 0.9) 86%,
+    transparent 100%
+  );
+}
+.group\/lm:hover .lm-chrome,
+.group\/lm:focus-visible .lm-chrome {
+  animation: lm-spin var(--lm-speed, 8s) linear infinite;
+}
+.group\/lm:hover .lm-chrome-rev,
+.group\/lm:focus-visible .lm-chrome-rev {
+  animation: lm-spin var(--lm-speed-rev, 11.6s) linear infinite reverse;
 }
 @keyframes lm-spin {
   to {
@@ -290,7 +310,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lm-chrome {
+  .group\/lm:hover .lm-chrome,
+  .group\/lm:focus-visible .lm-chrome,
+  .group\/lm:hover .lm-chrome-rev,
+  .group\/lm:focus-visible .lm-chrome-rev {
     animation: none;
   }
 }

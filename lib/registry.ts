@@ -555,9 +555,9 @@ export const REGISTRY: RegistryEntry[] = [
     slug: "liquid-metal-button",
     name: "Liquid Metal Button",
     category: "Motion",
-    summary: "Dark glass button with a flowing chrome edge.",
+    summary: "Dark glass button with a fine platinum bezel.",
     description:
-      "A call-to-action wrapped in a ring of liquid chrome. Two counter-rotating conic gradients are blended and warped through a fractal-noise displacement map, so the reflections ripple like molten metal. A specular hotspot follows the pointer and a sheen sweeps the face on hover, with no scaling and no WebGL.",
+      "A call-to-action with a layered platinum bezel. Two counter-rotating conic gradients sit under a cut-edge hairline and catch-light; the rim only spins on hover so scroll stays smooth. A specular hotspot follows the pointer and a sheen sweeps the face on hover, with no SVG filters and no WebGL.",
     keywords: ["button", "cta", "metal", "chrome", "liquid", "shine", "hero"],
     files: ["components/motion/liquid-metal-button.tsx", "app/globals.css"],
     deps: ["next"],
