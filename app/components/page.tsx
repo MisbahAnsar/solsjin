@@ -60,8 +60,7 @@ export default function ComponentsOverview() {
     <main className="relative px-5 pb-24 pt-16 sm:px-10 sm:pt-20 lg:px-14 lg:pt-24">
       <Clouds className="h-[520px]" intensity={0.7} />
       <div className="relative max-w-[920px]">
-        <p className="text-xs font-semibold uppercase tracking-[.14em] text-faint">Component library</p>
-        <h1 className="mt-3 text-[clamp(34px,5vw,52px)] font-semibold leading-[1.02] tracking-[-.055em] text-balance text-fg">
+        <h1 className="text-[clamp(34px,5vw,52px)] font-semibold leading-[1.02] tracking-[-.055em] text-balance text-fg">
           Solana UI you can copy into your app.
         </h1>
         <p className="mt-5 max-w-[58ch] text-[15px] leading-7 text-muted">

@@ -76,10 +76,10 @@ export function Waitlist({ source = "site", cta = "Notify me", className }: Wait
       }
       if (res.ok && data.status === "already_subscribed") {
         setStatus("exists");
-        setMessage("You're already on the list. We'll email you at launch.");
+        setMessage("You're already on the list. We'll email when something new ships.");
       } else if (res.ok) {
         setStatus("subscribed");
-        setMessage("You're on the list. We'll email you the moment it ships.");
+        setMessage("You're on the list. We'll email when something new ships.");
         setEmail("");
       } else {
         setStatus("error");
