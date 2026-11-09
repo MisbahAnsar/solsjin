@@ -43,9 +43,9 @@ export function SiteHeader() {
           style={{ maxWidth: 1080 }}
           transition={reduce ? { duration: 0 } : morph}
         >
-          <LiquidGlass className="flex h-14 items-center gap-2 pl-4 pr-1.5" material={compact ? "regular" : "clear"} radius={9999} refraction>
+          <LiquidGlass className="flex h-14 items-center gap-2 px-5 sm:px-6" material={compact ? "regular" : "clear"} radius={9999} refraction>
             <Logo />
-            <nav aria-label="Main" className="ml-5 hidden items-center gap-0.5 md:flex">
+            <nav aria-label="Main" className="ml-4 hidden items-center gap-0.5 md:flex">
               {LINKS.map((link) => (
                 <Link
                   className="rounded-full px-3 py-1.5 text-[13px] font-medium text-muted transition-colors duration-200 hover:bg-fg/[.06] hover:text-fg"
@@ -56,7 +56,7 @@ export function SiteHeader() {
                 </Link>
               ))}
             </nav>
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-0.5">
               <a
                 aria-label="GitHub repository"
                 className="grid size-9 place-items-center rounded-full text-fg-soft transition-colors duration-200 hover:bg-fg/[.06] hover:text-fg"
@@ -67,7 +67,12 @@ export function SiteHeader() {
                 <GithubLogoIcon size={18} weight="bold" />
               </a>
               <ThemeToggle className="border-transparent bg-transparent hover:border-transparent hover:bg-fg/[.06]" />
-              <ConnectWallet className="hidden sm:inline-flex" label="Connect" size="sm" />
+              <ConnectWallet
+                className="hidden rounded-full px-3 text-fg-soft shadow-none hover:bg-fg/[.06] hover:text-fg sm:inline-flex"
+                label="Connect"
+                size="sm"
+                variant="ghost"
+              />
             </div>
           </LiquidGlass>
         </motion.div>
